@@ -7,9 +7,6 @@ function ProtectedRoute({children}) {
     const navigate = useNavigate();
     
     useEffect(() => {
-        console.log(token);
-    },[token])
-    useEffect(() => {
         if(!token){
             navigate('/login');
             window.alert("Please Login");

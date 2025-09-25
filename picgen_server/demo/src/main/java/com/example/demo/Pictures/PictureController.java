@@ -3,6 +3,8 @@ package com.example.demo.Pictures;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -37,22 +39,25 @@ public class PictureController {
         return pictureService.getPictures();
     }
 
+
     @GetMapping("/user")
-    public List<Picture> getPicturesByUser(){
+    public ResponseEntity<?> getPicturesByUser() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
         Long id = userService.getUserIdByEmail(email);
         return pictureService.getPicturesById(id);
+        
     }
 
+
     @PostMapping
-    public void postPicture(@RequestBody pictureRequestDTO dto) {
+    public ResponseEntity<?> postPicture(@RequestBody pictureRequestDTO dto) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
         Long id = userService.getUserIdByEmail(email);
         User user = new User(id);
-        Picture picture = new Picture(dto.fileName(), dto.filePath(), user);
-        pictureService.addPicture(picture);
+        
+        return pictureService.addPicture(dto, user);
     }
 
     @DeleteMapping(path="{pictureId}")
@@ -65,7 +70,12 @@ public class PictureController {
         pictureService.changePictureName(pictureId, fileName);
     }
     
-    public record pictureRequestDTO(String fileName, String filePath){
+   
 
-    };
+    public record pictureRequestDTO(String fileName, String filePath) {
+
+    }
+
+    
+    
 }

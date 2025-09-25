@@ -3,7 +3,11 @@ package com.example.demo.Pictures;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import com.example.demo.Pictures.PictureController.pictureRequestDTO;
+import com.example.demo.User.User;
 
 import jakarta.transaction.Transactional;
 
@@ -17,8 +21,12 @@ public class PictureService {
         this.pictureRepository = pictureRepository;
     }
 
-    public List<Picture> getPicturesById(Long userId){
-        return pictureRepository.findPicturesByUserId(userId);
+    public ResponseEntity<?> getPicturesById(Long userId){
+
+        
+        List<Picture> pics = pictureRepository.findPicturesByUserId(userId);
+        pictureDTO dto = new pictureDTO(pics);
+        return ResponseEntity.ok(new pictureResponse(dto, "Get pictures success", true));
     }
 
     public List<Picture> getPictures() {
@@ -26,9 +34,11 @@ public class PictureService {
     }
 
 
-    public void addPicture(Picture picture) {
+    public ResponseEntity<?> addPicture(pictureRequestDTO dto, User user) {
+        Picture picture = new Picture(dto.fileName(), dto.filePath(), user);
         pictureRepository.save(picture);
-        System.out.println("picture saved");
+        //improve later for errors
+        return ResponseEntity.ok("Picture Saved");
     }
 
     public void deletePicture(Long pictureId) {
@@ -54,7 +64,13 @@ public class PictureService {
 
     
 
+    public record pictureResponse(pictureDTO dto, String message, boolean success) {
 
+    };
+
+     public record pictureDTO(List<Picture> pics){
+
+    };
 
     
 }

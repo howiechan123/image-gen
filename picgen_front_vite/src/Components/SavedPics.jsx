@@ -1,24 +1,25 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import {useToken} from "./TokenContext";
 
 function SavedPics() {
-    const PICS_URL = import.meta.env.REACT_APP_API_PICTURES_URL;
+    const PICS_URL = import.meta.env.VITE_API_PICTURES_URL;
     const {token, changeToken} = useToken();
-    let pics = [];
+    const[pics, setPics] = useState(["No Pictures"]);
+
+
     const getPics = async(token) => {
         try{
             const data = {
-                headers: {Authorization: 'Bearer ${token}'}
+                headers: {Authorization: `Bearer ${token}`}
             }
-            console.log("here");
             const response = await axios.get(PICS_URL, data);
-            // if(response.data.success){
-            //     pics = response.data;
-            //     console.log(response.data);
-            // }
-            // pics = response.data;
-            
+            if(response.data.success){
+                let pics = response.data.dto.pics
+                let paths = pics.map(pics => pics.filePath);
+                setPics(paths);
+            }
+            console.log(response.data.dto.pics);
         }
         catch(error) {
             window.alert(error);
@@ -26,7 +27,7 @@ function SavedPics() {
     };
 
     useEffect(() => {
-        getPics();
+        getPics(token);
     }, [])
 
     return(
