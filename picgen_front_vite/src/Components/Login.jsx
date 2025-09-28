@@ -88,6 +88,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { useToken } from "./TokenContext"
+import { login } from "../api/AuthAPI";
 
 function Login() {
     const LOGIN_URL = import.meta.env.VITE_API_LOGIN_URL;
@@ -102,31 +103,20 @@ function Login() {
     const setPass = (usr) => setPassword(usr.target.value);
 
     const handleLogin = async () => {
-        const data = { email, password };
         try {
-            const response = await axios.post(LOGIN_URL, data)
+            const response = await login(email, password);
+
             if (response.data.success) {
-                changeToken(response.data.token);
-                window.alert("Success");
-                navigate('/home');
-                console.log(response);
+            changeToken(response.data.token);
+            navigate("/home");
+            console.log(response);
             } else {
-                window.alert("Wrong username or password!");
+            window.alert("Wrong username or password!");
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 401) {
-                    window.alert("Invalid credentials! Please check your username or password.");
-                } else {
-                    window.alert(error.response.status);
-                }
-            } else if (error.request) {
-                window.alert("No response from the server. Please check your connection.");
-            } else {
-                window.alert("An unexpected error occurred.");
-            }
+            window.alert(error.message);
         }
-    }
+    };
 
     const handleSignUp = () => navigate('/register');
     const handleGuest = () => navigate('/guest');

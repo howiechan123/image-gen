@@ -51,7 +51,7 @@ public class PictureController {
 
 
     @PostMapping
-    public ResponseEntity<?> postPicture(@RequestBody pictureRequestDTO dto) {
+    public ResponseEntity<?> savePicture(@RequestBody pictureRequestDTO dto) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
         Long id = userService.getUserIdByEmail(email);

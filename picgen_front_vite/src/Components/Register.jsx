@@ -86,6 +86,8 @@
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { register } from "../api/AuthAPI";
+import { useToken } from "./TokenContext";
 
 function Register() {
     const REGISTER_URL = import.meta.env.VITE_API_REGISTER_URL;
@@ -102,25 +104,29 @@ function Register() {
     const updatePassword = (usr) => setPassword(usr.target.value);
     const updateReenter = (usr) => setReenter(usr.target.value);
 
+    const { changeToken } = useToken();
+
+
     const handleRegister = async () => {
         if (!name || !email || !password || !reenter) {
             return window.alert("Please fill out all fields to sign up");
         }
+
         if (password !== reenter) {
             return window.alert("Passwords do not match");
         }
 
-        const data = { name, email, password };
         try {
-            const response = await axios.post(REGISTER_URL, data);
+            const response = await register(name, email, password);
+
             if (response.data.success) {
-                window.alert("Successfully Registered");
-                navigate('/login');
+            navigate("/home");
             } else {
+                console.log(response);
                 window.alert("User already exists");
             }
         } catch (error) {
-            window.alert(error);
+            window.alert(error.message);
         }
     };
 

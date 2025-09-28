@@ -1,37 +1,35 @@
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import {useToken} from "./TokenContext";
+import { getPictures } from "../api/PictureAPI";
+import Header from "./Header";
 
 function SavedPics() {
     const PICS_URL = import.meta.env.VITE_API_PICTURES_URL;
-    const {token, changeToken} = useToken();
     const[pics, setPics] = useState(["No Pictures"]);
 
 
-    const getPics = async(token) => {
+    const getPics = async() => {
         try{
-            const data = {
-                headers: {Authorization: `Bearer ${token}`}
-            }
-            const response = await axios.get(PICS_URL, data);
+            const response = await getPictures();
+            console.log("PP", response);
             if(response.data.success){
                 let pics = response.data.dto.pics
                 let paths = pics.map(pics => pics.filePath);
                 setPics(paths);
             }
-            console.log(response.data.dto.pics);
+            console.log(response);
         }
         catch(error) {
-            window.alert(error);
         }
     };
 
     useEffect(() => {
-        getPics(token);
+        getPics();
     }, [])
 
     return(
-        <div>
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white px-4 py-8">
+            <Header isGuest={false}/>
             {pics}
         </div>
     );

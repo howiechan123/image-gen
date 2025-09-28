@@ -15,7 +15,7 @@
 
 // export default ImageModal;
 
-function ImageModal({ isOpen, onClose, image }) {
+function ImageModal({ isOpen, onClose, image, isGuest, loading, savePic }) {
     if (!isOpen) return null;
 
     return (
@@ -28,12 +28,23 @@ function ImageModal({ isOpen, onClose, image }) {
                         className="w-full h-full object-contain rounded-lg border border-gray-700"
                     />
                 </div>
-                <button
-                    onClick={onClose}
-                    className="mt-4 px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 active:bg-gray-800 transition-colors shadow-md"
-                >
-                    Close
-                </button>
+                <div className="flex-1 w-full flex items-center justify-center space-x-4">
+                    <button
+                        onClick={onClose}
+                        className="mt-4 px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 active:bg-gray-800 transition-colors shadow-md"
+                    >
+                        Close
+                    </button>
+                    {!isGuest && !loading && (
+                        <button
+                            onClick={onClose}
+                            className="mt-4 px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors shadow-md"
+                        >
+                            Save
+                        </button>
+                    )}
+                </div>
+
             </div>
         </div>
     );

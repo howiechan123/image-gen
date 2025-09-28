@@ -1,19 +1,17 @@
 import { useContext, useEffect } from "react";
 import { useToken } from "./TokenContext";
-import { useNavigate } from "react-router-dom";
+import Loading from "./Loading.jsx";
+import { Navigate } from "react-router-dom";
+
 
 function ProtectedRoute({children}) {
-    const { token } = useToken();
-    const navigate = useNavigate();
+    const { token, loading } = useToken();
     
-    useEffect(() => {
-        if(!token){
-            navigate('/login');
-            window.alert("Please Login");
-        }
-    }, [token, navigate]);
+    if (loading) return <Loading/>;
+    if (!token) return <Navigate to="/login" replace />;
+
+    return children;
     
-    return token ? children : null;
 }
 
 export default ProtectedRoute;
