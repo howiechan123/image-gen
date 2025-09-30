@@ -91,7 +91,6 @@ import { useToken } from "./TokenContext"
 import { login } from "../api/AuthAPI";
 
 function Login() {
-    const LOGIN_URL = import.meta.env.VITE_API_LOGIN_URL;
 
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();

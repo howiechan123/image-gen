@@ -17,3 +17,14 @@ export const register = async (name, email, password) => {
     throw new Error(err.response?.data?.message || "Registration failed");
   }
 };
+
+export const logout = async() => {
+  try{
+    const response = await SpringAPI.post("public/login/logout");
+    console.log("logged out", response);
+    return response;
+  }
+  catch(err){
+    throw new Error(err.response?.data?.message || "Log out failed");
+  }
+}

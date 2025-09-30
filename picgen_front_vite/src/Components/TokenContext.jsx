@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import SpringAPI from "../api/SpringAPI";
+import axios from "axios";
 
 const TokenContext = createContext();
 
@@ -14,11 +15,16 @@ export const TokenProvider = ({children}) => {
         setToken(t);
     }
 
+    const noInterceptor = axios.create({
+        baseURL: import.meta.env.VITE_API_SPRING_BASE_URL,
+        withCredentials: true,
+    });
 
     useEffect(() => {
         const tryRefresh = async () => {
             try {
-                const res = await SpringAPI.post("/public/login/refresh");
+                //dont use interceptor for initial call, avoid refresh loop
+                const res = await noInterceptor.post("/public/login/refresh");
                 const newToken = res.data.token;
                 setToken(newToken);
                 console.log("TT", res);

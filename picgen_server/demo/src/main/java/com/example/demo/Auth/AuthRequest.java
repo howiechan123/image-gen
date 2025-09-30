@@ -1,14 +1,14 @@
-package com.example.demo.Login;
+package com.example.demo.Auth;
 
-public class LoginRequest {
+public class AuthRequest {
     
     private String email;
     private String password;
 
-    public LoginRequest() {
+    public AuthRequest() {
     }
 
-    public LoginRequest(String email, String password) {
+    public AuthRequest(String email, String password) {
         this.email = email;
         this.password = password;
     }

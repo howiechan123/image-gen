@@ -1,14 +1,14 @@
-package com.example.demo.Login;
+package com.example.demo.Auth;
 import com.example.demo.User.User;
 
 
-public class LoginResponse {
+public class AuthResponse {
     private boolean success;
     private String message;
     private User user;
     private String token;
 
-    public LoginResponse(String message, boolean success, User user, String token) {
+    public AuthResponse(String message, boolean success, User user, String token) {
         this.message = message;
         this.success = success;
         this.user = user;
