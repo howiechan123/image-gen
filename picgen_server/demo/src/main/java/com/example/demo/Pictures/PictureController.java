@@ -42,6 +42,7 @@ public class PictureController {
 
     @GetMapping("/user")
     public ResponseEntity<?> getPicturesByUser() {
+        System.out.println("GGGGGGGGGGG");
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
         Long id = userService.getUserIdByEmail(email);
@@ -50,7 +51,7 @@ public class PictureController {
     }
 
 
-    @PostMapping
+    @PostMapping(path="/save")
     public ResponseEntity<?> savePicture(@RequestBody pictureRequestDTO dto) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();

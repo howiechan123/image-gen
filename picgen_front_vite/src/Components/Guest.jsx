@@ -6,6 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ButtonWrapper from "./ButtonWrapper";
 import Header from "./Header";
+import { savePicture } from "../api/PictureAPI";
 
 function Guest({ isGuest = true }) {
     const [prompt, setPrompt] = useState();
@@ -15,6 +16,8 @@ function Guest({ isGuest = true }) {
 
     const updatePrompt = (usr) => setPrompt(usr.target.value);
     const openModal = () => setImageModalOpen(true);
+
+
     const closeModal = () => {
         setImageModalOpen(false);
         setLoading(false);
@@ -38,6 +41,15 @@ function Guest({ isGuest = true }) {
         setLoading(false);
     };
 
+    const savePic = async() => {
+        try{
+            const response = await savePicture(prompt, image);
+        }
+        catch(err){
+            throw new Error(err);
+        }
+        closeModal();
+    }
    
 
 
@@ -47,7 +59,7 @@ function Guest({ isGuest = true }) {
 
             <Header isGuest={isGuest}/>
 
-            <ImageModal isOpen={imageModalOpen} onClose={closeModal} image={image} isGuest={isGuest} loading={loading} />
+            <ImageModal isOpen={imageModalOpen} onClose={closeModal} image={image} isGuest={isGuest} loading={loading} savePic={savePic} />
             
             
             <div className="flex items-center justify-center mt-8">

@@ -30,9 +30,9 @@ public class SecurityConfig{
             .cors().and()
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // .requestMatchers("/public/**").permitAll()
-                // .anyRequest().authenticated()
-                .anyRequest().permitAll()
+                .requestMatchers("/public/auth/**").permitAll()
+                .anyRequest().authenticated()
+                // .anyRequest().permitAll()
             )
             .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class)
             ;

@@ -1,20 +1,3 @@
-
-// function ImageModal({isOpen, onClose, image}){
-//     if(!isOpen){
-//         return null;
-//     }
-
-//     return(
-//         <div>
-//             <img src={image} alt="loading..."></img>
-//             <div></div>
-//             <button onClick={onClose}>Close</button>
-//         </div>
-//     );
-// }
-
-// export default ImageModal;
-
 function ImageModal({ isOpen, onClose, image, isGuest, loading, savePic }) {
     if (!isOpen) return null;
 
@@ -37,7 +20,7 @@ function ImageModal({ isOpen, onClose, image, isGuest, loading, savePic }) {
                     </button>
                     {!isGuest && !loading && (
                         <button
-                            onClick={onClose}
+                            onClick={savePic}
                             className="mt-4 px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors shadow-md"
                         >
                             Save

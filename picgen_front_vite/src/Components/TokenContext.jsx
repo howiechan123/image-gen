@@ -27,9 +27,7 @@ export const TokenProvider = ({children}) => {
                 const res = await noInterceptor.post("/public/auth/refresh");
                 const newToken = res.data.token;
                 setToken(newToken);
-                console.log("TT", res);
             } catch (err) {
-                console.log("tt", err);
                 setToken(null);
             } finally {
                 setLoading(false);

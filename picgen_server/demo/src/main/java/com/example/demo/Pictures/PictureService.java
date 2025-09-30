@@ -23,7 +23,7 @@ public class PictureService {
 
     public ResponseEntity<?> getPicturesById(Long userId){
 
-        
+        System.out.println("OOOOOO");
         List<Picture> pics = pictureRepository.findPicturesByUserId(userId);
         pictureDTO dto = new pictureDTO(pics);
         return ResponseEntity.ok(new pictureResponse(dto, "Get pictures success", true));

@@ -7,6 +7,10 @@ const SpringAPI = axios.create({
   withCredentials: true,
 });
 
+const noInterceptor = axios.create({
+  baseURL: import.meta.env.VITE_API_SPRING_BASE_URL,
+  withCredentials: true,
+});
 
 let requestInterceptor;
 let responseInterceptor;
@@ -34,15 +38,19 @@ export const setupInterceptors = (tokenContext) => {
       const originalRequest = error.config;
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
+        console.log("XXXXX");
         try {
-          const refreshRes = await SpringAPI.post("/public/login/refresh");
-          const newToken = refreshRes.data.accessToken;
+          const refreshRes = await noInterceptor.post("/public/auth/refresh");
+          const newToken = refreshRes.data.token;
 
-          // Update context → App will re-render with new token
           tokenContext.changeToken(newToken);
 
-          // Retry original request with new token
-          originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+        // Retry original request with new token
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: `Bearer ${newToken}`,
+        };
+          console.log(refreshRes.data);
           return SpringAPI(originalRequest);
         } catch (refreshError) {
           console.log(refreshError);

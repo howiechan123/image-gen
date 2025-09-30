@@ -77,7 +77,9 @@ public class AuthService {
 
 
     public ResponseEntity<?> refresh(String refreshToken) {
+        System.out.println("Refresh token" + refreshToken);
         if (refreshToken == null || isBlacklisted(refreshToken)) {
+            System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 1");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
 
@@ -85,19 +87,21 @@ public class AuthService {
             String email = jwtUtil.extractEmail(refreshToken);
 
             if (!jwtUtil.validateToken(refreshToken, email)) {
+                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 2");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
             }
 
+            System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 8");
             String newAccessToken = jwtUtil.generateToken(email);
             return ResponseEntity.ok(new loginResponse(null, "Token refreshed", true, newAccessToken));
 
         } catch (Exception e) {
+            System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 3");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired refresh token");
         }
     }
 
     public ResponseEntity<?> logout(HttpServletResponse response, @CookieValue(value = "refreshToken", required = false) String refreshToken) {
-        System.out.println("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO" + refreshToken);
         if (refreshToken != null) {
             java.util.Date expiry = jwtUtil.extractClaim(refreshToken, Claims::getExpiration);
             blacklistRepo.save(new BlacklistedToken(refreshToken, new java.sql.Date(expiry.getTime())));

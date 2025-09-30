@@ -12,7 +12,6 @@ const Header = ({isGuest}) => {
     const handleLogOut = async() => {
         changeToken(null);
         const response = await logout();
-        console.log(response);
         navigate('/login');
     };
 

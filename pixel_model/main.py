@@ -111,9 +111,9 @@ except Exception:
 def generate_pixel_art(prompt: str):
     image = pipe(
         prompt=prompt,
-        height=1048,
-        width=1048,
-        num_inference_steps=50,
+        height=128,
+        width=128,
+        num_inference_steps=5,
     ).images[0]
     return image
 

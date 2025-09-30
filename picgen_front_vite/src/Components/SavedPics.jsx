@@ -11,7 +11,6 @@ function SavedPics() {
     const getPics = async() => {
         try{
             const response = await getPictures();
-            console.log("savedpics", response);
             if(response.data.success){
                 let pics = response.data.dto.pics
                 let paths = pics.map(pics => pics.filePath);
@@ -20,6 +19,7 @@ function SavedPics() {
             console.log(response);
         }
         catch(error) {
+            console.log(error);
         }
     };
 
