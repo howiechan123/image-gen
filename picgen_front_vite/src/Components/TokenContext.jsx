@@ -24,12 +24,12 @@ export const TokenProvider = ({children}) => {
         const tryRefresh = async () => {
             try {
                 //dont use interceptor for initial call, avoid refresh loop
-                const res = await noInterceptor.post("/public/login/refresh");
+                const res = await noInterceptor.post("/public/auth/refresh");
                 const newToken = res.data.token;
                 setToken(newToken);
                 console.log("TT", res);
             } catch (err) {
-                console.log("Refresh failed, user must log in again");
+                console.log("tt", err);
                 setToken(null);
             } finally {
                 setLoading(false);

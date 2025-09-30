@@ -2,7 +2,7 @@ import SpringAPI from "./SpringAPI";
 
 export const login = async (email, password) => {
   try {
-    const response = await SpringAPI.post("public/login", { email, password });
+    const response = await SpringAPI.post("public/auth", { email, password });
     return response;
   } catch (err) {
     throw new Error(err.response?.data?.message || "Login failed");
@@ -20,7 +20,7 @@ export const register = async (name, email, password) => {
 
 export const logout = async() => {
   try{
-    const response = await SpringAPI.post("public/login/logout");
+    const response = await SpringAPI.post("public/auth/logout");
     console.log("logged out", response);
     return response;
   }

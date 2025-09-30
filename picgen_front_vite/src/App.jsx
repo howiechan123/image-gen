@@ -4,7 +4,7 @@ import Register from './Components/Register.jsx';
 import Home from './Components/Home.jsx';
 import SavedPics from './Components/SavedPics.jsx';
 import Guest from './Components/Guest.jsx';
-import Account from './Components/Accountl.jsx';
+import Account from './Components/Account.jsx';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { TokenProvider, useToken } from './Components/TokenContext.jsx';
 import ProtectedRoute from './Components/ProtectedRoute.jsx';

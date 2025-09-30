@@ -11,7 +11,7 @@ function SavedPics() {
     const getPics = async() => {
         try{
             const response = await getPictures();
-            console.log("PP", response);
+            console.log("savedpics", response);
             if(response.data.success){
                 let pics = response.data.dto.pics
                 let paths = pics.map(pics => pics.filePath);

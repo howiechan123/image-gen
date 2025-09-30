@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/public/login")
+@RequestMapping("/public/auth")
 public class AuthController {
 
     @Autowired
@@ -39,8 +39,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response) {
-        return loginService.logout(response);
+    public ResponseEntity<?> logout(HttpServletResponse response, @CookieValue(value = "refreshToken", required = false) String refreshToken) {
+        return loginService.logout(response, refreshToken);
     }
     
 

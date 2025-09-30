@@ -45,7 +45,7 @@ export const setupInterceptors = (tokenContext) => {
           originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
           return SpringAPI(originalRequest);
         } catch (refreshError) {
-          console.log("Refresh failed, redirect to login");
+          console.log(refreshError);
           window.location.href = "/login";
           return Promise.reject(refreshError);
         }
