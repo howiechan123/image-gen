@@ -3,11 +3,9 @@ package com.example.demo.Pictures;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.User.User;
 import com.example.demo.User.UserService;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path="api/Pictures")
 public class PictureController {
@@ -42,7 +39,7 @@ public class PictureController {
 
     @GetMapping("/user")
     public ResponseEntity<?> getPicturesByUser() {
-        System.out.println("GGGGGGGGGGG");
+
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
         Long id = userService.getUserIdByEmail(email);
@@ -53,6 +50,7 @@ public class PictureController {
 
     @PostMapping(path="/save")
     public ResponseEntity<?> savePicture(@RequestBody pictureRequestDTO dto) {
+
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
         Long id = userService.getUserIdByEmail(email);

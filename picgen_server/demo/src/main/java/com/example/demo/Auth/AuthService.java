@@ -1,25 +1,22 @@
 package com.example.demo.Auth;
 
-import org.springframework.http.*;
-
 import java.sql.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.PostMapping;
-
-import jakarta.servlet.http.Cookie;
 
 import com.example.demo.JWT.JWTUtil;
 import com.example.demo.User.User;
 import com.example.demo.User.UserRepository;
 
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 
 @Service
 public class AuthService {
@@ -77,9 +74,8 @@ public class AuthService {
 
 
     public ResponseEntity<?> refresh(String refreshToken) {
-        System.out.println("Refresh token" + refreshToken);
         if (refreshToken == null || isBlacklisted(refreshToken)) {
-            System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 1");
+
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
 
@@ -87,16 +83,16 @@ public class AuthService {
             String email = jwtUtil.extractEmail(refreshToken);
 
             if (!jwtUtil.validateToken(refreshToken, email)) {
-                System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 2");
+
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
             }
 
-            System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 8");
+ 
             String newAccessToken = jwtUtil.generateToken(email);
             return ResponseEntity.ok(new loginResponse(null, "Token refreshed", true, newAccessToken));
 
         } catch (Exception e) {
-            System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 3");
+  
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired refresh token");
         }
     }

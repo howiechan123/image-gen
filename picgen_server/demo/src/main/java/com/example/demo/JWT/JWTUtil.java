@@ -30,7 +30,7 @@ public class JWTUtil {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 5)) //15 min
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 10))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -58,7 +58,6 @@ public class JWTUtil {
     }
 
     public boolean validateToken(String token, String email) {
-        System.out.println("Validating token: " + token);
         return extractEmail(token).equals(email) && !isTokenExpired(token);
     }
 

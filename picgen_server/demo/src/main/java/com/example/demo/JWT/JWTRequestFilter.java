@@ -7,8 +7,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -34,29 +34,52 @@ public class JWTRequestFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
 
             try {
+
                 String email = jwtUtil.extractEmail(token);
 
-                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                //     UserDetails userDetails = User.withUsername(email)
+                //                                 .password("")
+                //                                 .roles("USER")
+                //                                 .build();
+
+                //     if (jwtUtil.validateToken(token, email)) {
+                //         UsernamePasswordAuthenticationToken authenticationToken =
+                //             new UsernamePasswordAuthenticationToken(
+                //                 userDetails, null, userDetails.getAuthorities()
+                //             );
+                //         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                //     }
+                    
+                // }
+
+
+                if (email != null && jwtUtil.validateToken(token, email)) {
+                    // Assign ROLE_USER by default for valid tokens
                     UserDetails userDetails = User.withUsername(email)
                                                 .password("")
-                                                .roles("USER")
+                                                .roles("USER")  // simpler
                                                 .build();
 
-                    if (jwtUtil.validateToken(token, email)) {
-                        UsernamePasswordAuthenticationToken authenticationToken =
+                    UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities()
                             );
-                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                    }
+
+                    authenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
+
+
             } catch (io.jsonwebtoken.ExpiredJwtException e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
-                response.getWriter().write("Token expired");
                 return;
             } catch (io.jsonwebtoken.JwtException e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
-                response.getWriter().write("Invalid token");
+
                 return;
             }
         }

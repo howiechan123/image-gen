@@ -1,4 +1,6 @@
 package com.example.demo.config;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,7 +14,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.example.demo.JWT.JWTRequestFilter;
-import java.util.List;
 
 @Configuration
 public class SecurityConfig{
@@ -30,7 +31,7 @@ public class SecurityConfig{
             .cors().and()
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/public/auth/**").permitAll()
+                .requestMatchers("/public/**").permitAll()
                 .anyRequest().authenticated()
                 // .anyRequest().permitAll()
             )

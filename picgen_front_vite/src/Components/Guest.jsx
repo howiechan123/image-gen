@@ -41,9 +41,17 @@ function Guest({ isGuest = true }) {
         setLoading(false);
     };
 
+    function stripBase64Prefix(base64) {
+        if (base64.startsWith("data:image")) {
+            return base64.substring(base64.indexOf(",") + 1);
+        }
+        return base64;
+    }
+
     const savePic = async() => {
+        let base64 = stripBase64Prefix(image);
         try{
-            const response = await savePicture(prompt, image);
+            const response = await savePicture(prompt, base64);
         }
         catch(err){
             throw new Error(err);

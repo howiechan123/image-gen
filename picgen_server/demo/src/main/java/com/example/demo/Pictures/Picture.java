@@ -22,17 +22,19 @@ public class Picture {
     private Long pictureId;
     private String filePath;
     private String fileName;
+    private String deleteUrl;
 
     @ManyToOne
     @JoinColumn(name="userId", nullable=false)
     @JsonBackReference
     private User user;
 
-    public Picture(Long pictureId, String filePath, String fileName, User user) {
+    public Picture(Long pictureId, String filePath, String fileName, User user, String deleteUrl) {
         this.pictureId = pictureId;
         this.filePath = filePath;
         this.fileName = fileName;
         this.user = user;
+        this.deleteUrl = deleteUrl;
     }
 
     public Picture() {
@@ -43,10 +45,23 @@ public class Picture {
         this.filePath = filePath;
     }
 
+    public Picture(Long pictureId, String filePath, String deleteUrl) {
+        this.pictureId = pictureId;
+        this.filePath = filePath;
+        this.deleteUrl = deleteUrl;
+    }
+
     public Picture(String fileName, String filePath, User user) {
         this.fileName = fileName;
         this.filePath = filePath;
         this.user = user;
+    }
+
+    public Picture(String fileName, String filePath, User user, String deleteUrl) {
+        this.fileName = fileName;
+        this.filePath = filePath;
+        this.user = user;
+        this.deleteUrl = deleteUrl;
     }
 
     public Long getPictureId() {
@@ -79,6 +94,14 @@ public class Picture {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getDeleteUrl() {
+        return deleteUrl;
+    }
+
+    public void setDeleteUrl(String deleteUrl) {
+        this.deleteUrl = deleteUrl;
     }
 
     

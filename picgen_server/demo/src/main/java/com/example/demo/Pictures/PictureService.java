@@ -15,15 +15,16 @@ import jakarta.transaction.Transactional;
 public class PictureService {
     
     private final PictureRepository pictureRepository;
+    private final ImgBBService imgbbService;
 
     @Autowired
-    public PictureService(PictureRepository pictureRepository) {
+    public PictureService(PictureRepository pictureRepository, ImgBBService imgbbService) {
         this.pictureRepository = pictureRepository;
+        this.imgbbService = imgbbService;
     }
 
     public ResponseEntity<?> getPicturesById(Long userId){
 
-        System.out.println("OOOOOO");
         List<Picture> pics = pictureRepository.findPicturesByUserId(userId);
         pictureDTO dto = new pictureDTO(pics);
         return ResponseEntity.ok(new pictureResponse(dto, "Get pictures success", true));
@@ -35,7 +36,13 @@ public class PictureService {
 
 
     public ResponseEntity<?> addPicture(pictureRequestDTO dto, User user) {
-        Picture picture = new Picture(dto.fileName(), dto.filePath(), user);
+
+
+        ResponseEntity<?> response = imgbbService.uploadImage(dto.filePath());
+        ImgBBService.imgBBResponse responseBody = (ImgBBService.imgBBResponse) response.getBody();
+
+
+        Picture picture = new Picture(dto.fileName(), responseBody.dto().filePath(), user, responseBody.dto().deleteUrl());
         pictureRepository.save(picture);
         //improve later for errors
         return ResponseEntity.ok("Picture Saved");
@@ -68,7 +75,7 @@ public class PictureService {
 
     };
 
-     public record pictureDTO(List<Picture> pics){
+    public record pictureDTO(List<Picture> pics){
 
     };
 
