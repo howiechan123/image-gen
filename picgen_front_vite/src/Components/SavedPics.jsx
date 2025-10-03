@@ -62,7 +62,7 @@ function SavedPics() {
           onDelete={(picId) => {
             setPics((prev) => prev.filter((pic) => pic.picId !== picId));
             setSelectedPic(null);
-            }}
+          }}
         />
       )}
     </div>

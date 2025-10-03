@@ -8,10 +8,9 @@ const EditPicNameModal = ({ isEditModalOpen, closeEditModal, image }) => {
     const [newName, setNewName] = useState(null);
 
     const edit = async (picId, newName) => {
-        console.log(newName);
         try {
             const response = editPictureName(picId, newName);
-            closeEditModal();
+            closeEditModal(newName);
             return response;
         } catch (err) {
             return new Error(err);
@@ -45,7 +44,7 @@ const EditPicNameModal = ({ isEditModalOpen, closeEditModal, image }) => {
                     </ButtonWrapper>
 
                     <button
-                        onClick={() => closeEditModal()}
+                        onClick={() => closeEditModal(image.fileName)}
                         className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition"
                     >
                         Cancel

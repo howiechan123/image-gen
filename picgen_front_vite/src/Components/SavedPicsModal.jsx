@@ -1,5 +1,5 @@
 import EditPicNameModal from "./EditPicNameModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaTrash, FaDownload, FaEdit } from "react-icons/fa";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
@@ -13,7 +13,11 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
     const closeDeleteModal = () => setIsDeleteModalOpen(false);
 
     const openEditModal = () => setIsEditModalOpen(true);
-    const closeEditModal = () => setIsEditModalOpen(false);
+    const closeEditModal = (newName) => {
+        image.fileName = newName;
+        setIsEditModalOpen(false);
+    }
+
 
     return (
         <div
@@ -60,7 +64,7 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
                     <span className="text-white font-medium">{image.fileName}</span>
                     <button 
                     className="text-white hover:text-gray-300 transition"
-                    onClick={() => openEditModal()}
+                    onClick={openEditModal}
                     >
                         <FaEdit />
                     </button>
@@ -69,7 +73,7 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
                 <EditPicNameModal
                 isEditModalOpen={isEditModalOpen}
                 image={image}
-                closeEditModal={() => closeEditModal()}
+                closeEditModal={closeEditModal}
                 />
 
                 
