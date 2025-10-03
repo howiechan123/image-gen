@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Header from "./Header";
 import { useUser } from "./UserContext";
@@ -6,20 +5,61 @@ import { FaEdit } from "react-icons/fa";
 
 const Account = () => {
   const { user } = useUser();
-  const [editingField, setEditingField] = useState(null);
-  const [formValues, setFormValues] = useState({
-    name: user.name,
-    email: user.email,
-    password: "",
-  });
 
-  const handleChange = (e) => {
-    setFormValues({ ...formValues, [e.target.name]: e.target.value });
+  // Actual saved values
+  const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
+  const [password, setPassword] = useState("");
+
+  // Editing states
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  // Temp inputs for editing
+  const [tempName, setTempName] = useState("");
+  const [tempEmail, setTempEmail] = useState("");
+  const [tempPassword, setTempPassword] = useState("");
+  const [deleteInput, setDeleteInput] = useState("");
+
+  const toggleEditing = (field) => {
+    // Close all other sections and reset temp inputs
+    setIsEditingName(field === "name" ? !isEditingName : false);
+    setIsEditingEmail(field === "email" ? !isEditingEmail : false);
+    setIsEditingPassword(field === "password" ? !isEditingPassword : false);
+    setIsDeletingAccount(field === "delete" ? !isDeletingAccount : false);
+
+    // Reset temp inputs when closing
+    if (field !== "name") setTempName("");
+    if (field !== "email") setTempEmail("");
+    if (field !== "password") setTempPassword("");
+    if (field !== "delete") setDeleteInput("");
   };
 
-  const handleConfirm = (field) => {
-    console.log("Confirm new value:", field, formValues[field]);
-    setEditingField(null);
+  const confirmName = () => {
+    if (tempName.trim() !== "") setName(tempName);
+    setIsEditingName(false);
+    setTempName("");
+  };
+
+  const confirmEmail = () => {
+    if (tempEmail.trim() !== "") setEmail(tempEmail);
+    setIsEditingEmail(false);
+    setTempEmail("");
+  };
+
+  const confirmPassword = () => {
+    if (tempPassword.trim() !== "") setPassword(tempPassword);
+    setIsEditingPassword(false);
+    setTempPassword("");
+  };
+
+  const handleDeleteAccount = () => {
+    console.log("Account deleted!");
+    // Add your delete logic here
+    setIsDeletingAccount(false);
+    setDeleteInput("");
   };
 
   return (
@@ -27,16 +67,14 @@ const Account = () => {
       <Header />
 
       <div className="max-w-xl mx-auto mt-10 space-y-8">
-        {/* Username */}
+        {/* Name */}
         <div>
           <label className="block text-sm text-gray-400 mb-1">Username</label>
           <div className="flex items-center justify-between border-b border-gray-700 pb-3">
-            <h1 className="text-3xl font-bold">{user.name}</h1>
+            <h1 className="text-3xl font-bold">{name}</h1>
             <button
               className="text-gray-400 hover:text-white"
-              onClick={() =>
-                setEditingField(editingField === "name" ? null : "name")
-              }
+              onClick={() => toggleEditing("name")}
             >
               <FaEdit size={20} />
             </button>
@@ -44,19 +82,19 @@ const Account = () => {
 
           <div
             className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              editingField === "name" ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
+              isEditingName ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
             }`}
           >
             <div className="flex gap-3 items-center">
               <input
                 type="text"
-                name="name"
-                value={formValues.name}
-                onChange={handleChange}
+                value={tempName}
+                onChange={(e) => setTempName(e.target.value)}
+                placeholder="Enter new name..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <button
-                onClick={() => handleConfirm("name")}
+                onClick={confirmName}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
               >
                 Confirm
@@ -69,12 +107,10 @@ const Account = () => {
         <div>
           <label className="block text-sm text-gray-400 mb-1">Email</label>
           <div className="flex items-center justify-between border-b border-gray-700 pb-3">
-            <p className="text-lg">{user.email}</p>
+            <p className="text-lg">{email}</p>
             <button
               className="text-gray-400 hover:text-white"
-              onClick={() =>
-                setEditingField(editingField === "email" ? null : "email")
-              }
+              onClick={() => toggleEditing("email")}
             >
               <FaEdit size={18} />
             </button>
@@ -82,19 +118,19 @@ const Account = () => {
 
           <div
             className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              editingField === "email" ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
+              isEditingEmail ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
             }`}
           >
             <div className="flex gap-3 items-center">
               <input
                 type="email"
-                name="email"
-                value={formValues.email}
-                onChange={handleChange}
+                value={tempEmail}
+                onChange={(e) => setTempEmail(e.target.value)}
+                placeholder="Enter new email..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <button
-                onClick={() => handleConfirm("email")}
+                onClick={confirmEmail}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
               >
                 Confirm
@@ -110,9 +146,7 @@ const Account = () => {
             <p className="text-lg text-gray-500">••••••••</p>
             <button
               className="text-gray-400 hover:text-white"
-              onClick={() =>
-                setEditingField(editingField === "password" ? null : "password")
-              }
+              onClick={() => toggleEditing("password")}
             >
               <FaEdit size={18} />
             </button>
@@ -120,19 +154,19 @@ const Account = () => {
 
           <div
             className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              editingField === "password" ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
+              isEditingPassword ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
             }`}
           >
             <div className="flex gap-3 items-center">
               <input
                 type="password"
-                name="password"
-                value={formValues.password}
-                onChange={handleChange}
+                value={tempPassword}
+                onChange={(e) => setTempPassword(e.target.value)}
+                placeholder="Enter new password..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
               <button
-                onClick={() => handleConfirm("password")}
+                onClick={confirmPassword}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
               >
                 Confirm
@@ -140,10 +174,51 @@ const Account = () => {
             </div>
           </div>
         </div>
+
+        {/* Delete Account */}
+        <div>
+          <label className="block text-sm text-gray-400 mb-1">Delete Account</label>
+          <div className="flex items-center justify-between border-b border-red-600 pb-3">
+            <p className="text-lg text-red-500">Permanently delete your account</p>
+            <button
+              className="text-red-400 hover:text-red-600"
+              onClick={() => toggleEditing("delete")}
+            >
+              Delete
+            </button>
+          </div>
+
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+              isDeletingAccount ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="flex gap-3 items-center">
+              <input
+                type="text"
+                value={deleteInput}
+                onChange={(e) => setDeleteInput(e.target.value)}
+                placeholder='Type "DELETE" to confirm'
+                className="flex-1 px-3 py-2 rounded bg-gray-800 border border-red-600 focus:ring-2 focus:ring-red-500 outline-none"
+              />
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteInput !== "DELETE"}
+                className={`px-4 py-2 rounded-lg ${
+                  deleteInput === "DELETE"
+                    ? "bg--600 hover:bg-red-500"
+                    : "bg-red-800 cursor-not-allowed"
+                }`}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
 };
 
 export default Account;
-
