@@ -1,6 +1,5 @@
-
 import EditPicNameModal from "./EditPicNameModal";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FaTrash, FaDownload, FaEdit } from "react-icons/fa";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const touchStartY = useRef(null);
 
   const openDeleteModal = () => setIsDeleteModalOpen(true);
   const closeDeleteModal = () => setIsDeleteModalOpen(false);
@@ -16,6 +16,21 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
   const closeEditModal = (newName) => {
     image.fileName = newName;
     setIsEditModalOpen(false);
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartY.current === null) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaY = touchEndY - touchStartY.current;
+    if (deltaY > 100) {
+      // Swipe down threshold
+      onClose();
+    }
+    touchStartY.current = null;
   };
 
   return (
@@ -28,6 +43,8 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
           transition={{ duration: 0.1, ease: "easeInOut" }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
           onClick={onClose}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           <motion.div
             initial={{ scale: 0.85, opacity: 0 }}
@@ -37,14 +54,12 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
             className="relative w-full h-full flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()} // Prevent closing on inner click
           >
-            
             <img
               src={image.filePath}
               alt={image.fileName}
               className="w-full h-full object-contain"
             />
 
-            
             <div className="absolute right-6 bottom-1/2 transform translate-y-1/2 flex flex-col gap-4">
               <button
                 className="w-12 h-12 bg-white/30 hover:bg-white/50 text-white rounded-full flex items-center justify-center shadow-lg transition"
@@ -63,7 +78,6 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
               </button>
             </div>
 
-            
             <button
               onClick={onClose}
               className="absolute top-4 right-4 bg-black/60 text-white rounded-full p-3 hover:bg-black/80 transition z-50"
@@ -71,7 +85,6 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
               ✕
             </button>
 
-            
             <div className="absolute bottom-6 flex items-center gap-2 bg-black/50 px-4 py-2 rounded-lg">
               <span className="text-white font-medium">{image.fileName}</span>
               <button
@@ -82,7 +95,6 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
               </button>
             </div>
 
-            
             <EditPicNameModal
               isEditModalOpen={isEditModalOpen}
               image={image}

@@ -64,7 +64,7 @@ const Account = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white px-4 py-8">
+    <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
       <Header />
 
       <div className="max-w-xl mx-auto mt-10 space-y-8">

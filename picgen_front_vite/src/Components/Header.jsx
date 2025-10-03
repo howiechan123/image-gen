@@ -65,13 +65,16 @@ const Header = ({ isGuest }) => {
   };
 
   return (
-    <header className="w-full max-w-4xl mx-auto border-b border-gray-700 flex flex-col md:flex-row md:justify-end md:space-x-5 py-5">
+<header className="sticky top-0 z-50 w-full max-w-4xl mx-auto
+                   bg-gray-950
+                   flex flex-col md:flex-row md:justify-end md:space-x-5 py-2">
+
       
       {/* Mobile title and hamburger */}
       {!isGuest && (
         <div className="flex justify-between items-center md:hidden px-4 mb-3">
           <h1 className="text-white font-bold">{currentPage}</h1>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white text-2xl">
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white text-xl">
             <FontAwesomeIcon icon={mobileMenuOpen ? faX : faBars} />
           </button>
         </div>
@@ -84,7 +87,7 @@ const Header = ({ isGuest }) => {
             transform transition-transform duration-100 ease-in-out
             ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}
             md:static md:translate-x-0 md:w-auto md:h-auto md:bg-transparent md:flex
-            flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-5 px-4 py-20 md:py-0
+            flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-5 px-4 py-9 md:py-0
         `}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -104,11 +107,12 @@ const Header = ({ isGuest }) => {
             <div className="border-b border-gray-700 md:border-none last:border-b-0">
               <button onClick={() => handleNavClick(goHome)} className={linkButton}>Home</button>
             </div>
-            <div className="border-b border-gray-700 md:border-none last:border-b-0">
-              <button onClick={() => handleNavClick(openAccount)} className={linkButton}>Account</button>
-            </div>
+            
             <div className="border-b border-gray-700 md:border-none last:border-b-0">
               <button onClick={() => handleNavClick(openSavedPics)} className={linkButton}>Saved Pictures</button>
+            </div>
+            <div className="border-b border-gray-700 md:border-none last:border-b-0">
+              <button onClick={() => handleNavClick(openAccount)} className={linkButton}>Account</button>
             </div>
             <div className="border-b border-gray-700 md:border-none last:border-b-0">
               <button onClick={() => handleNavClick(handleLogOut)} className={linkButton}>Log Out</button>
