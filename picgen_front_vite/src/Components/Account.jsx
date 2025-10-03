@@ -2,35 +2,35 @@ import { useState } from "react";
 import Header from "./Header";
 import { useUser } from "./UserContext";
 import { FaEdit } from "react-icons/fa";
+import ButtonWrapper from "./ButtonWrapper";
 
 const Account = () => {
   const { user } = useUser();
 
-  // Actual saved values
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
 
-  // Editing states
+  
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
-  // Temp inputs for editing
+  
   const [tempName, setTempName] = useState("");
   const [tempEmail, setTempEmail] = useState("");
   const [tempPassword, setTempPassword] = useState("");
   const [deleteInput, setDeleteInput] = useState("");
 
   const toggleEditing = (field) => {
-    // Close all other sections and reset temp inputs
+    
     setIsEditingName(field === "name" ? !isEditingName : false);
     setIsEditingEmail(field === "email" ? !isEditingEmail : false);
     setIsEditingPassword(field === "password" ? !isEditingPassword : false);
     setIsDeletingAccount(field === "delete" ? !isDeletingAccount : false);
 
-    // Reset temp inputs when closing
+    
     if (field !== "name") setTempName("");
     if (field !== "email") setTempEmail("");
     if (field !== "password") setTempPassword("");
@@ -57,7 +57,7 @@ const Account = () => {
 
   const handleDeleteAccount = () => {
     console.log("Account deleted!");
-    // Add your delete logic here
+    
     setIsDeletingAccount(false);
     setDeleteInput("");
   };
@@ -67,7 +67,7 @@ const Account = () => {
       <Header />
 
       <div className="max-w-xl mx-auto mt-10 space-y-8">
-        {/* Name */}
+        
         <div>
           <label className="block text-sm text-gray-400 mb-1">Username</label>
           <div className="flex items-center justify-between border-b border-gray-700 pb-3">
@@ -93,17 +93,19 @@ const Account = () => {
                 placeholder="Enter new name..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
+              <ButtonWrapper clickable={tempName != null && tempName.length > 0}>
               <button
                 onClick={confirmName}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
               >
                 Confirm
               </button>
+              </ButtonWrapper>
             </div>
           </div>
         </div>
 
-        {/* Email */}
+        
         <div>
           <label className="block text-sm text-gray-400 mb-1">Email</label>
           <div className="flex items-center justify-between border-b border-gray-700 pb-3">
@@ -129,17 +131,18 @@ const Account = () => {
                 placeholder="Enter new email..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
+              <ButtonWrapper clickable={tempEmail != null && tempEmail.length > 0}>
               <button
                 onClick={confirmEmail}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
               >
                 Confirm
               </button>
+              </ButtonWrapper>
             </div>
           </div>
         </div>
 
-        {/* Password */}
         <div>
           <label className="block text-sm text-gray-400 mb-1">Password</label>
           <div className="flex items-center justify-between border-b border-gray-700 pb-3">
@@ -165,17 +168,18 @@ const Account = () => {
                 placeholder="Enter new password..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
+              <ButtonWrapper clickable={tempPassword != null && tempPassword.length > 0}>
               <button
                 onClick={confirmPassword}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
               >
                 Confirm
               </button>
+              </ButtonWrapper>
             </div>
           </div>
         </div>
 
-        {/* Delete Account */}
         <div>
           <label className="block text-sm text-gray-400 mb-1">Delete Account</label>
           <div className="flex items-center justify-between border-b border-red-600 pb-3">

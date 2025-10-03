@@ -37,7 +37,7 @@ const EditPicNameModal = ({ isEditModalOpen, closeEditModal, image }) => {
             className="bg-gray-900 text-white rounded-lg shadow-lg p-6 w-full max-w-sm flex flex-col items-center gap-4"
             onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
           >
-            <p className="text-center">Enter a new name for this picture:</p>
+            <p className="text-center">Edit:</p>
 
             <input
               id="newName"

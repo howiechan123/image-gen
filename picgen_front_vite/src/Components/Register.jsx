@@ -1,111 +1,16 @@
-// import { useState } from "react";
-// import { Navigate, useNavigate } from 'react-router-dom';
-// import axios from "axios";
-
-
-
-// function Register() {
-//     const REGISTER_URL = import.meta.env.VITE_API_REGISTER_URL;
-
-//     const [name, setName] = useState();
-//     const [email, setEmail] = useState();
-//     const [password, setPassword] = useState();
-//     const [reenter, setReenter] = useState();
-
-//     const navigate = useNavigate();
-
-//     const updateName = (usr) => {
-//         setName(usr.target.value);
-//     }
-//     const updateEmail = (usr) => {
-//         setEmail(usr.target.value);
-//     }
-//     const updatePassword = (usr) => {
-//         setPassword(usr.target.value);
-//     }
-//     const updateReenter = (usr) => {
-//         setReenter(usr.target.value);
-//     }
-
-
-//     const handleRegister = async () => {
-
-//         if(name === undefined || email === undefined || password === undefined || reenter === undefined) {
-//             window.alert("please fill out all sections to sign up");
-//             return;
-//         }
-        
-//         if(name === "" || email === "" || password === "" || reenter === "") {
-//             window.alert("please fill out all areas to sign up");
-//             return;
-//         }
-//         if(password !== reenter){
-//             window.alert("passwords do not match");
-//             return;
-//         }
-
-//         const data = {
-//             "name": name,
-//             "email": email,
-//             "password": password
-//         }
-//         try{
-//             const response = await axios.post(REGISTER_URL, data)
-//             if(response.data.success){
-//                 window.alert("Succesfully Registered");
-//                 navigate('/login');
-//             }
-//             else{
-//                 window.alert("User already exists");
-//             }
-//         }
-//         catch(error){
-//             window.alert(error);
-//         }
-//     }
-
-//     return(
-//         <div>
-//             <header>Sign Up</header>
-//             <div>Name</div>
-//             <input id="name" type="text" onChange={updateName}></input>
-//             <div>Email</div>
-//             <input id="email" type="text" onChange={updateEmail}></input>
-//             <div>Password</div>
-//             <input id="password" type="text" onChange={updatePassword}></input>
-//             <div>Re-enter password</div>
-//             <input id="reenter" type="text" onChange={updateReenter}></input>
-//             <div></div>
-//             <button id="register" onClick={() => handleRegister()}>Register</button>
-//         </div>
-//     );
-// }
-
-// export default Register;
-
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import axios from "axios";
 import { register } from "../api/AuthAPI";
 import { useToken } from "./TokenContext";
 
 function Register() {
-    const REGISTER_URL = import.meta.env.VITE_API_REGISTER_URL;
-
-    const [name, setName] = useState();
-    const [email, setEmail] = useState();
-    const [password, setPassword] = useState();
-    const [reenter, setReenter] = useState();
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [reenter, setReenter] = useState("");
 
     const navigate = useNavigate();
-
-    const updateName = (usr) => setName(usr.target.value);
-    const updateEmail = (usr) => setEmail(usr.target.value);
-    const updatePassword = (usr) => setPassword(usr.target.value);
-    const updateReenter = (usr) => setReenter(usr.target.value);
-
     const { changeToken } = useToken();
-
 
     const handleRegister = async () => {
         if (!name || !email || !password || !reenter) {
@@ -120,7 +25,7 @@ function Register() {
             const response = await register(name, email, password);
 
             if (response.data.success) {
-            navigate("/home");
+                navigate("/home");
             } else {
                 console.log(response);
                 window.alert("User already exists");
@@ -129,6 +34,8 @@ function Register() {
             window.alert(error.message);
         }
     };
+
+    const linkStyle = "text-indigo-400 font-medium hover:text-indigo-600 cursor-pointer transition-colors duration-200";
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white px-4">
@@ -141,7 +48,8 @@ function Register() {
                         <input
                             id="name"
                             type="text"
-                            onChange={updateName}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                         />
                     </div>
@@ -151,7 +59,8 @@ function Register() {
                         <input
                             id="email"
                             type="text"
-                            onChange={updateEmail}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                         />
                     </div>
@@ -161,7 +70,8 @@ function Register() {
                         <input
                             id="password"
                             type="password"
-                            onChange={updatePassword}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                         />
                     </div>
@@ -171,27 +81,24 @@ function Register() {
                         <input
                             id="reenter"
                             type="password"
-                            onChange={updateReenter}
+                            value={reenter}
+                            onChange={(e) => setReenter(e.target.value)}
                             className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                         />
                     </div>
                 </div>
 
                 <button
-                    id="register"
                     onClick={handleRegister}
                     className="w-full py-2 rounded-lg bg-green-600 hover:bg-green-500 active:bg-green-700 transition-colors shadow-md"
                 >
                     Register
                 </button>
 
-                <button 
-                    id="login" 
-                    onClick={() => navigate("/login")}
-                    className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors shadow-md"
-                >
-                    Login
-                </button>
+                <div className="text-center text-sm mt-4">
+                    <span>Already have an account? </span>
+                    <span onClick={() => navigate("/login")} className={linkStyle}>Login</span>
+                </div>
             </div>
         </div>
     );

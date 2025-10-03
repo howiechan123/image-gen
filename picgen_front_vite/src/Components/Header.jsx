@@ -3,17 +3,16 @@ import { useToken } from "./TokenContext";
 import { logout } from "../api/AuthAPI";
 import { useUser } from "./UserContext";
 
-const Header = ({isGuest}) => {
-    let navigate = useNavigate();
-    let {changeToken} = useToken();
-    const {setUser} = useUser();
+const Header = ({ isGuest }) => {
+    const navigate = useNavigate();
+    const { changeToken } = useToken();
+    const { setUser } = useUser();
 
     const handleLogin = () => navigate('/login');
     const handleSignUp = () => navigate('/register');
 
-    const handleLogOut = async() => {
-        
-        const response = await logout();
+    const handleLogOut = async () => {
+        await logout();
         changeToken(null, null);
         navigate('/login');
     };
@@ -22,20 +21,21 @@ const Header = ({isGuest}) => {
     const openAccount = () => navigate("/account");
     const goHome = () => navigate("/home");
 
-    return(
+    const linkButton = `
+        px-3 py-1 rounded transition-all duration-200
+        text-white font-medium
+        hover:border-b hover:border-indigo-400 hover:text-indigo-400
+        focus:outline-none
+    `;
+
+    return (
         <div>
             {isGuest && (
                 <header className="w-full max-w-4xl mx-auto flex justify-end space-x-4 py-4 border-b border-gray-700">
-                    <button 
-                        onClick={handleLogin}
-                        className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 active:bg-gray-800 transition-colors shadow-md"
-                    >
+                    <button onClick={handleLogin} className={linkButton}>
                         Log In
                     </button>
-                    <button 
-                        onClick={handleSignUp}
-                        className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-500 active:bg-green-700 transition-colors shadow-md"
-                    >
+                    <button onClick={handleSignUp} className={linkButton}>
                         Sign Up
                     </button>
                 </header>
@@ -43,33 +43,20 @@ const Header = ({isGuest}) => {
 
             {!isGuest && (
                 <header className="w-full max-w-4xl mx-auto flex justify-end space-x-4 py-4 border-b border-gray-700">
-                    <button
-                        onClick={goHome}
-                        className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors shadow-md"
-                    >
+                    <button onClick={goHome} className={linkButton}>
                         Home
                     </button>
-                    <button
-                        onClick={openAccount}
-                        className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors shadow-md"
-                    >
+                    <button onClick={openAccount} className={linkButton}>
                         Account
                     </button>
-                    <button
-                        onClick={openSavedPics}
-                        className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors shadow-md"
-                    >
+                    <button onClick={openSavedPics} className={linkButton}>
                         Saved Pictures
                     </button>
-                    <button
-                        onClick={handleLogOut}
-                        className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 active:bg-gray-800 transition-colors shadow-md"
-                    >
+                    <button onClick={handleLogOut} className={linkButton}>
                         Log Out
                     </button>
                 </header>
             )}
-
         </div>
     );
 }
