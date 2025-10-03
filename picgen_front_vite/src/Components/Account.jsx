@@ -3,14 +3,10 @@ import Header from "./Header";
 import { useUser } from "./UserContext";
 import { FaEdit } from "react-icons/fa";
 import ButtonWrapper from "./ButtonWrapper";
+import { updateUser } from "../api/UserAPI";
 
 const Account = () => {
   const { user } = useUser();
-
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
-  const [password, setPassword] = useState("");
-
   
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -37,22 +33,27 @@ const Account = () => {
     if (field !== "delete") setDeleteInput("");
   };
 
-  const confirmName = () => {
-    if (tempName.trim() !== "") setName(tempName);
+  const confirmName = async() => {
+    if (tempName.trim() !== "") user.name = tempName;
+    const response = await updateUser(user.id, tempName, null, null);
     setIsEditingName(false);
     setTempName("");
+    return response;
   };
 
-  const confirmEmail = () => {
-    if (tempEmail.trim() !== "") setEmail(tempEmail);
+  const confirmEmail = async() => {
+    if (tempEmail.trim() !== "") user.email = tempEmail;
+    const response = await updateUser(user.id, null, tempEmail, null);
     setIsEditingEmail(false);
     setTempEmail("");
+    return response;
   };
 
-  const confirmPassword = () => {
-    if (tempPassword.trim() !== "") setPassword(tempPassword);
+  const confirmPassword = async() => {
+    const response = await updateUser(user.id, null, null, tempPassword);
     setIsEditingPassword(false);
     setTempPassword("");
+    return response;
   };
 
   const handleDeleteAccount = () => {
@@ -71,7 +72,7 @@ const Account = () => {
         <div>
           <label className="block text-sm text-gray-400 mb-1">Username</label>
           <div className="flex items-center justify-between border-b border-gray-700 pb-3">
-            <h1 className="text-3xl font-bold">{name}</h1>
+            <h1 className="text-3xl font-bold">{user.name}</h1>
             <button
               className="text-gray-400 hover:text-white"
               onClick={() => toggleEditing("name")}
@@ -95,7 +96,7 @@ const Account = () => {
               />
               <ButtonWrapper clickable={tempName != null && tempName.length > 0}>
               <button
-                onClick={confirmName}
+                onClick={() => confirmName()}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
               >
                 Confirm
@@ -109,7 +110,7 @@ const Account = () => {
         <div>
           <label className="block text-sm text-gray-400 mb-1">Email</label>
           <div className="flex items-center justify-between border-b border-gray-700 pb-3">
-            <p className="text-lg">{email}</p>
+            <p className="text-lg">{user.email}</p>
             <button
               className="text-gray-400 hover:text-white"
               onClick={() => toggleEditing("email")}
@@ -133,7 +134,7 @@ const Account = () => {
               />
               <ButtonWrapper clickable={tempEmail != null && tempEmail.length > 0}>
               <button
-                onClick={confirmEmail}
+                onClick={() => confirmEmail()}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
               >
                 Confirm

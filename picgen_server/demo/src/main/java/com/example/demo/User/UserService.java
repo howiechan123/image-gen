@@ -74,8 +74,14 @@ public class UserService {
             user.setPassword(password);
         }
 
-        System.out.println("user " + userId + " updated");
+        System.out.println("user " + userId + " updated" + name + email + password);
     }
     
+    public record userResponse(userDTO dto, String message, boolean success){
+
+    }
+    public record userDTO(Long id, String name, String email) {
+
+    }
 
 }

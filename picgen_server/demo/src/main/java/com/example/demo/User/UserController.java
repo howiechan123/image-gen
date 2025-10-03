@@ -57,11 +57,12 @@ public class UserController {
     }
 
     @PutMapping(path = "{id}")
-    public void updateUser(@PathVariable("id") Long userId, 
-    @RequestParam(required=false) String name,
-    @RequestParam(required=false) String email,
-    @RequestParam(required=false) String password) {
+    public void updateUser(@PathVariable("id") Long userId, @RequestBody updateUserDTO dto) {
         
-        userService.updateUser(userId, name, email, password);
+        userService.updateUser(userId, dto.name, dto.email, dto.password);
+    }
+
+    public record updateUserDTO(String name, String email, String password){
+
     }
 }
