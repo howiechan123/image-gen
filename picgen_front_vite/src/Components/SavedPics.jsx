@@ -6,6 +6,7 @@ import SavedPicsModal from "./SavedPicsModal";
 function SavedPics() {
   const [pics, setPics] = useState([]);
   const [selectedPic, setSelectedPic] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getPics = async () => {
     try {
@@ -24,6 +25,17 @@ function SavedPics() {
       console.log(error);
     }
   };
+    const openModal = (pic) => {
+        setSelectedPic(pic);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        // wait until animation ends before removing pic
+        setTimeout(() => setSelectedPic(null), 300); // 300ms = same as exit duration
+    };
+
 
   useEffect(() => {
     getPics();
@@ -39,7 +51,7 @@ function SavedPics() {
           {pics.map((p, idx) => (
             <div
               key={idx}
-              onClick={() => setSelectedPic(p)}
+              onClick={() => openModal(p)}
               className="cursor-pointer overflow-hidden rounded-md"
             >
               <img
@@ -54,17 +66,17 @@ function SavedPics() {
       </div>
 
       
-      {selectedPic && (
+        {selectedPic && (
         <SavedPicsModal
-          isOpen={!!selectedPic}
-          image={selectedPic}
-          onClose={() => {setSelectedPic(null)}}
-          onDelete={(picId) => {
+            isOpen={isModalOpen}
+            image={selectedPic}
+            onClose={closeModal}
+            onDelete={(picId) => {
             setPics((prev) => prev.filter((pic) => pic.picId !== picId));
-            setSelectedPic(null);
-          }}
+            closeModal();
+            }}
         />
-      )}
+        )}
     </div>
   );
 }
