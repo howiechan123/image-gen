@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ImageModal from "./ImageModal";
 import loadgif from "./loading.gif";
 import axios from "axios";
@@ -7,27 +7,29 @@ import { useNavigate } from "react-router-dom";
 import ButtonWrapper from "./ButtonWrapper";
 import Header from "./Header";
 import { savePicture } from "../api/PictureAPI";
+import { useToken } from "./TokenContext";
 
 function Guest({ isGuest = true }) {
     const [prompt, setPrompt] = useState();
     const [imageModalOpen, setImageModalOpen] = useState(false);
-    const [image, setImage] = useState(loadgif);
-    const [loading, setLoading] = useState(false);
+    const [image, setImage] = useState(null);
+    const [generating, setGenerating] = useState(false);
 
     const updatePrompt = (usr) => setPrompt(usr.target.value);
     const openModal = () => setImageModalOpen(true);
+    
+    const {setLoading} = useToken();
 
 
     const closeModal = () => {
         setImageModalOpen(false);
-        setLoading(false);
+        setGenerating(false);
     };
 
     const handleGenerate = async () => {
         if (!prompt) return window.alert("Please enter a prompt");
-        setLoading(true);
+        setGenerating(true);
         openModal();
-        setImage(loadgif);
         const data = { prompt };
         try {
             const response = await axios.post("http://127.0.0.1:8000/generate-image", data);
@@ -38,7 +40,7 @@ function Guest({ isGuest = true }) {
         } catch (error) {
             window.alert(error);
         }
-        setLoading(false);
+        setGenerating(false);
     };
 
     function stripBase64Prefix(base64) {
@@ -50,16 +52,19 @@ function Guest({ isGuest = true }) {
 
     const savePic = async() => {
         let base64 = stripBase64Prefix(image);
+        setLoading(true);
         try{
             const response = await savePicture(prompt, base64);
         }
         catch(err){
             throw new Error(err);
         }
-        closeModal();
+        finally{
+            closeModal();
+            setLoading(false);
+        }
+        
     }
-   
-
 
 
     return (
@@ -67,7 +72,7 @@ function Guest({ isGuest = true }) {
 
             <Header isGuest={isGuest}/>
 
-            <ImageModal isOpen={imageModalOpen} onClose={closeModal} image={image} isGuest={isGuest} loading={loading} savePic={savePic} />
+            <ImageModal isOpen={imageModalOpen} onClose={() => closeModal()} image={image} isGuest={isGuest} generating={generating} savePic={() => savePic()} />
             
             
             <div className="flex items-center justify-center mt-8">
@@ -84,13 +89,13 @@ function Guest({ isGuest = true }) {
                     ></textarea>
 
                     <div className="flex justify-center">
-                        <ButtonWrapper clickable={!loading}>
+                        <ButtonWrapper clickable={!generating && prompt != null && prompt.length > 0}>
                             <button
                                 id="generate"
-                                onClick={handleGenerate}
+                                onClick={() => handleGenerate()}
                                 className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors shadow-md disabled:opacity-50"
                             >
-                                {loading ? "Generating..." : "Generate!"}
+                                {generating ? "Generating..." : "Generate!"}
                             </button>
                         </ButtonWrapper>
                     </div>

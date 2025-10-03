@@ -12,4 +12,5 @@ public interface PictureRepository extends JpaRepository<Picture, Long>{
 
     @Query("SELECT p FROM Picture p WHERE p.user.id = ?1")
     List<Picture> findPicturesByUserId(Long userId);
+
 }

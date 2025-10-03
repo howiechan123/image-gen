@@ -23,3 +23,23 @@ export const getPictures = async() => {
         throw new Error(err);
     }
 }
+
+export const deletePicture = async(picId) => {
+    try{
+        const response = await SpringAPI.delete(`api/Pictures/${picId}`);
+        return response;
+    }
+    catch(err){
+        throw new Error(err);
+    }
+}
+
+export const editPictureName = async(picId, newName) => {
+    try{
+        const response = await SpringAPI.put(`api/Pictures/${picId}`, {newName});
+        return response;
+    }
+    catch(err) {
+        throw new Error(err);
+    }
+}

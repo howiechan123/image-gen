@@ -10,6 +10,7 @@ import { TokenProvider, useToken } from './Components/TokenContext.jsx';
 import ProtectedRoute from './Components/ProtectedRoute.jsx';
 import { setupInterceptors } from './api/SpringAPI';
 import { useEffect } from 'react';
+import { UserProvider } from './Components/UserContext.jsx';
 
 const AppContent = () => {
   const tokenContext = useToken();
@@ -34,13 +35,17 @@ const AppContent = () => {
 
 function App() {
   return (
+    <UserProvider>
     <TokenProvider>
+      
       <Router>
         <div className='App'>
           <AppContent />
         </div>
       </Router>
+      
     </TokenProvider>
+    </UserProvider>
   );
 }
 

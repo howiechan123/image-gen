@@ -39,7 +39,7 @@ public class AuthService {
         blacklistRepo.save(token);
     }
 
-    // Call this in refresh endpoint
+    // Call this on refresh
     private boolean isBlacklisted(String refreshToken) {
         return blacklistRepo.existsByToken(refreshToken);
     }
@@ -49,7 +49,7 @@ public class AuthService {
 
         if (user == null || !BCrypt.checkpw(password, user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials");
-    }
+        }
 
         
         String accessToken = jwtUtil.generateToken(email);
@@ -79,17 +79,21 @@ public class AuthService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
 
+
         try {
             String email = jwtUtil.extractEmail(refreshToken);
+            
 
             if (!jwtUtil.validateToken(refreshToken, email)) {
 
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
             }
 
+            User user = userRepository.findUserByEmail(email).orElse(null);
+            userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
  
             String newAccessToken = jwtUtil.generateToken(email);
-            return ResponseEntity.ok(new loginResponse(null, "Token refreshed", true, newAccessToken));
+            return ResponseEntity.ok(new loginResponse(dto, "Token refreshed", true, newAccessToken));
 
         } catch (Exception e) {
   

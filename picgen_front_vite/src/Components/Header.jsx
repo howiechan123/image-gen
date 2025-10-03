@@ -1,17 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { useToken } from "./TokenContext";
 import { logout } from "../api/AuthAPI";
+import { useUser } from "./UserContext";
 
 const Header = ({isGuest}) => {
     let navigate = useNavigate();
     let {changeToken} = useToken();
+    const {setUser} = useUser();
 
     const handleLogin = () => navigate('/login');
     const handleSignUp = () => navigate('/register');
 
     const handleLogOut = async() => {
-        changeToken(null);
+        
         const response = await logout();
+        changeToken(null, null);
         navigate('/login');
     };
 

@@ -65,13 +65,17 @@ public class PictureController {
     }
 
     @PutMapping(path="{pictureId}")
-    public void changePictureName(@PathVariable("pictureId") Long pictureId, @RequestParam String fileName){
-        pictureService.changePictureName(pictureId, fileName);
+    public void changePictureName(@PathVariable("pictureId") Long pictureId, @RequestBody changeNameDTO dto){
+        pictureService.changePictureName(pictureId, dto.newName);
     }
     
    
 
     public record pictureRequestDTO(String fileName, String filePath) {
+
+    }
+
+    public record changeNameDTO(String newName){
 
     }
 

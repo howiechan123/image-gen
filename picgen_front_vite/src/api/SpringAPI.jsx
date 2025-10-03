@@ -47,10 +47,11 @@ export const setupInterceptors = (tokenContext) => {
         try {
           const refreshRes = await noInterceptor.post("/public/auth/refresh");
           const newToken = refreshRes.data.token;
+          const user = refreshRes.data.user;
 
 
           curToken = newToken;
-          tokenContext.changeToken(newToken);
+          tokenContext.changeToken(newToken, user);
           originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
 
           console.log("OOOOOOOOOOOOOOOO", originalRequest.headers.Authorization);

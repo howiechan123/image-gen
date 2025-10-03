@@ -184,6 +184,14 @@ function Register() {
                 >
                     Register
                 </button>
+
+                <button 
+                    id="login" 
+                    onClick={() => navigate("/login")}
+                    className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition-colors shadow-md"
+                >
+                    Login
+                </button>
             </div>
         </div>
     );

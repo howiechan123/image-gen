@@ -26,16 +26,15 @@ public class ImgBBService {
             throw new IllegalArgumentException("Base64 image is empty");
         }
 
-        // Remove data:image/... prefix if present
         if (base64Image.startsWith("data:image")) {
             base64Image = base64Image.substring(base64Image.indexOf(",") + 1);
         }
 
-        String url = "https://api.imgbb.com/1/upload?key=" + apiKey;
+        String url = "https://api.imgbb.com/1/upload?key=" + apiKey + "&expiration=600";
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("image", base64Image);
-        // Removed body.add("name", fileName) because fileName is not a parameter
+
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
