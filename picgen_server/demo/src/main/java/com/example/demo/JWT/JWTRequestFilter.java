@@ -20,13 +20,16 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JWTRequestFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+
     @Autowired
     public JWTRequestFilter(JWTUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
@@ -34,36 +37,20 @@ public class JWTRequestFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
 
             try {
+                String userId = jwtUtil.extractUserId(token);
 
-                String email = jwtUtil.extractEmail(token);
-
-                // if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                //     UserDetails userDetails = User.withUsername(email)
-                //                                 .password("")
-                //                                 .roles("USER")
-                //                                 .build();
-
-                //     if (jwtUtil.validateToken(token, email)) {
-                //         UsernamePasswordAuthenticationToken authenticationToken =
-                //             new UsernamePasswordAuthenticationToken(
-                //                 userDetails, null, userDetails.getAuthorities()
-                //             );
-                //         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                //     }
-                    
-                // }
-
-
-                if (email != null && jwtUtil.validateToken(token, email)) {
-                    // Assign ROLE_USER by default for valid tokens
-                    UserDetails userDetails = User.withUsername(email)
-                                                .password("")
-                                                .roles("USER")  // simpler
-                                                .build();
+                if (userId != null && jwtUtil.validateToken(token, userId)) {
+                    // userId used as the "username"
+                    UserDetails userDetails = User.withUsername(userId)
+                                                  .password("") // no password needed for JWT
+                                                  .roles("USER") // default role
+                                                  .build();
 
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities()
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
                             );
 
                     authenticationToken.setDetails(
@@ -73,18 +60,15 @@ public class JWTRequestFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
 
-
             } catch (io.jsonwebtoken.ExpiredJwtException e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             } catch (io.jsonwebtoken.JwtException e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
-
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
         }
 
         chain.doFilter(request, response);
     }
-
 }

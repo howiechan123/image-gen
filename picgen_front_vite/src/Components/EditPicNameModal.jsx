@@ -24,7 +24,7 @@ const EditPicNameModal = ({ isEditModalOpen, closeEditModal, image }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.1, ease: "easeInOut" }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={() => closeEditModal(image.fileName)} // backdrop closes modal
         >
@@ -33,11 +33,10 @@ const EditPicNameModal = ({ isEditModalOpen, closeEditModal, image }) => {
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.85, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.1, ease: "easeInOut" }}
             className="bg-gray-900 text-white rounded-lg shadow-lg p-6 w-full max-w-sm flex flex-col items-center gap-4"
             onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
           >
-            <p className="text-center">Edit:</p>
 
             <input
               id="newName"

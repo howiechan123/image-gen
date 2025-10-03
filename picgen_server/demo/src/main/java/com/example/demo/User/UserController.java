@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,9 +55,9 @@ public class UserController {
     }
 
     @PutMapping(path = "{id}")
-    public void updateUser(@PathVariable("id") Long userId, @RequestBody updateUserDTO dto) {
+    public ResponseEntity<?> updateUser(@PathVariable("id") Long userId, @RequestBody updateUserDTO dto) {
         
-        userService.updateUser(userId, dto.name, dto.email, dto.password);
+        return userService.updateUser(userId, dto.name, dto.email, dto.password);
     }
 
     public record updateUserDTO(String name, String email, String password){

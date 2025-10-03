@@ -35,7 +35,7 @@ function Register() {
         }
     };
 
-    const linkStyle = "text-indigo-400 font-medium hover:text-indigo-600 cursor-pointer transition-colors duration-200";
+    const linkStyle = "text-indigo-400 font-medium hover:text-indigo-600 cursor-pointer transition-colors duration-100";
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white px-4">

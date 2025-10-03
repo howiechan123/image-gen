@@ -25,7 +25,7 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.1, ease: "easeInOut" }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
           onClick={onClose}
         >
@@ -33,7 +33,7 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
             initial={{ scale: 0.85, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.85, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.1, ease: "easeInOut" }}
             className="relative w-full h-full flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()} // Prevent closing on inner click
           >

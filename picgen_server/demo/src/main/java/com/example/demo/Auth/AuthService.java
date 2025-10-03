@@ -33,13 +33,13 @@ public class AuthService {
     }
     
 
-    // Call this on logout
+    //logout
     public void blacklistRefreshToken(String refreshToken, Date expiry) {
         BlacklistedToken token = new BlacklistedToken(refreshToken, expiry);
         blacklistRepo.save(token);
     }
 
-    // Call this on refresh
+    //refresh
     private boolean isBlacklisted(String refreshToken) {
         return blacklistRepo.existsByToken(refreshToken);
     }
@@ -52,8 +52,8 @@ public class AuthService {
         }
 
         
-        String accessToken = jwtUtil.generateToken(email);
-        String refreshToken = jwtUtil.generateRefreshToken(email);
+        String accessToken = jwtUtil.generateToken(user.getId());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId());
 
         
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
@@ -81,18 +81,18 @@ public class AuthService {
 
 
         try {
-            String email = jwtUtil.extractEmail(refreshToken);
+            String userId = jwtUtil.extractUserId(refreshToken);
             
 
-            if (!jwtUtil.validateToken(refreshToken, email)) {
+            if (!jwtUtil.validateToken(refreshToken, userId)) {
 
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
             }
 
-            User user = userRepository.findUserByEmail(email).orElse(null);
+            User user = userRepository.findUserById(Long.valueOf(userId)).orElse(null);
             userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
  
-            String newAccessToken = jwtUtil.generateToken(email);
+            String newAccessToken = jwtUtil.generateToken(Long.valueOf(userId));
             return ResponseEntity.ok(new loginResponse(dto, "Token refreshed", true, newAccessToken));
 
         } catch (Exception e) {

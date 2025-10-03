@@ -10,7 +10,7 @@ function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25 }}
+                    transition={{ duration: 0.1, ease: "easeInOut" }}
                     className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 p-4"
                     onClick={onClose}
                 >
@@ -18,7 +18,7 @@ function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic }) {
                         initial={{ scale: 0.85, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.85, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        transition={{ duration: 0.1, ease: "easeInOut" }}
                         className="bg-gray-900/90 text-white backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-5xl h-[80vh] flex flex-col p-6"
                         onClick={(e) => e.stopPropagation()} // Prevent inner click from closing
                     >

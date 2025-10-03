@@ -37,7 +37,6 @@ public class PictureService {
 
     public ResponseEntity<?> addPicture(pictureRequestDTO dto, User user) {
 
-
         ResponseEntity<?> response = imgbbService.uploadImage(dto.filePath());
         ImgBBService.imgBBResponse responseBody = (ImgBBService.imgBBResponse) response.getBody();
 

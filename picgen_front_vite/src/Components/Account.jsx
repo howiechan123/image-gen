@@ -6,7 +6,7 @@ import ButtonWrapper from "./ButtonWrapper";
 import { updateUser } from "../api/UserAPI";
 
 const Account = () => {
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -34,18 +34,18 @@ const Account = () => {
   };
 
   const confirmName = async() => {
-    if (tempName.trim() !== "") user.name = tempName;
     const response = await updateUser(user.id, tempName, null, null);
     setIsEditingName(false);
     setTempName("");
+    setUser(response.data.dto);
     return response;
   };
 
   const confirmEmail = async() => {
-    if (tempEmail.trim() !== "") user.email = tempEmail;
     const response = await updateUser(user.id, null, tempEmail, null);
     setIsEditingEmail(false);
     setTempEmail("");
+    setUser(response.data.dto);
     return response;
   };
 
@@ -82,7 +82,7 @@ const Account = () => {
           </div>
 
           <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            className={`transition-all duration-100 ease-in-out overflow-hidden ${
               isEditingName ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
             }`}
           >
@@ -120,7 +120,7 @@ const Account = () => {
           </div>
 
           <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            className={`transition-all duration-100 ease-in-out overflow-hidden ${
               isEditingEmail ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
             }`}
           >
@@ -157,7 +157,7 @@ const Account = () => {
           </div>
 
           <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            className={`transition-all duration-100 ease-in-out overflow-hidden ${
               isEditingPassword ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
             }`}
           >
@@ -194,7 +194,7 @@ const Account = () => {
           </div>
 
           <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            className={`transition-all duration-100 ease-in-out overflow-hidden ${
               isDeletingAccount ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
             }`}
           >

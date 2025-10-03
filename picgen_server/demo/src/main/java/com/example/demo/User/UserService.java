@@ -2,8 +2,11 @@ package com.example.demo.User;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -60,7 +63,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(Long userId, String name, String email, String password) {
+    public ResponseEntity<?> updateUser(Long userId, String name, String email, String password) {
         
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalStateException("user id does not exist"));
 
@@ -74,7 +77,11 @@ public class UserService {
             user.setPassword(password);
         }
 
-        System.out.println("user " + userId + " updated" + name + email + password);
+        
+
+        userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
+        System.out.println(dto);
+        return ResponseEntity.ok(new userResponse(dto, "User updated", true));
     }
     
     public record userResponse(userDTO dto, String message, boolean success){

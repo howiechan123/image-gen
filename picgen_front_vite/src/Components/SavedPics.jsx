@@ -18,24 +18,22 @@ function SavedPics() {
           picId: pic.pictureId,
           deleteUrl: pic.deleteUrl
         }));
-        console.log(response.data);
         setPics(mapped);
       }
     } catch (error) {
       console.log(error);
     }
   };
-    const openModal = (pic) => {
-        setSelectedPic(pic);
-        setIsModalOpen(true);
-    };
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-        // wait until animation ends before removing pic
-        setTimeout(() => setSelectedPic(null), 300); // 300ms = same as exit duration
-    };
+  const openModal = (pic) => {
+    setSelectedPic(pic);
+    setIsModalOpen(true);
+  };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedPic(null), 300); // wait for exit animation
+  };
 
   useEffect(() => {
     getPics();
@@ -43,11 +41,11 @@ function SavedPics() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white px-4 py-8">
-      <div className="w-full max-w-3xl mx-auto">
-        <Header isGuest={false} />
+      <Header isGuest={false} />
 
-        
-        <div className="grid grid-cols-3 gap-2 mt-6">
+      <div className="max-w-xl mx-auto mt-10 space-y-8">
+
+        <div className="grid grid-cols-3 gap-3 mt-6">
           {pics.map((p, idx) => (
             <div
               key={idx}
@@ -65,18 +63,17 @@ function SavedPics() {
         </div>
       </div>
 
-      
-        {selectedPic && (
+      {selectedPic && (
         <SavedPicsModal
-            isOpen={isModalOpen}
-            image={selectedPic}
-            onClose={closeModal}
-            onDelete={(picId) => {
+          isOpen={isModalOpen}
+          image={selectedPic}
+          onClose={closeModal}
+          onDelete={(picId) => {
             setPics((prev) => prev.filter((pic) => pic.picId !== picId));
             closeModal();
-            }}
+          }}
         />
-        )}
+      )}
     </div>
   );
 }

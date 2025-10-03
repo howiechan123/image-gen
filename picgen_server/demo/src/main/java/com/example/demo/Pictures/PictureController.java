@@ -41,9 +41,8 @@ public class PictureController {
     public ResponseEntity<?> getPicturesByUser() {
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
-        Long id = userService.getUserIdByEmail(email);
-        return pictureService.getPicturesById(id);
+        Long userId = Long.valueOf(userDetails.getUsername());
+        return pictureService.getPicturesById(userId);
         
     }
 
@@ -52,9 +51,8 @@ public class PictureController {
     public ResponseEntity<?> savePicture(@RequestBody pictureRequestDTO dto) {
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
-        Long id = userService.getUserIdByEmail(email);
-        User user = new User(id);
+        Long userId = Long.valueOf(userDetails.getUsername());
+        User user = new User(userId);
         
         return pictureService.addPicture(dto, user);
     }
