@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { register } from "../api/AuthAPI";
 import { useToken } from "./TokenContext";
-import { isValidEmail } from "../Util/validateEmail";
+import { isValidEmail, isValidPassword } from "../Util/validateStrings";
 
 function Register() {
     const [name, setName] = useState("");
@@ -16,6 +16,9 @@ function Register() {
     const handleRegister = async () => {
         if(!isValidEmail(email)){
             return window.alert("Enter a valid email");
+        }
+        if(!isValidEmail(password)){
+            return window.alert("Enter a valid password");
         }
         if (!name || !email || !password || !reenter) {
             return window.alert("Please fill out all fields to sign up");
@@ -48,7 +51,7 @@ function Register() {
 
                 <div className="space-y-4">
                     <div>
-                        <label htmlFor="name" className="block text-sm font-medium mb-1">Username</label>
+                        <label htmlFor="name" className="block text-lg font-medium mb-1">Username</label>
                         <input
                             id="name"
                             type="text"
@@ -59,7 +62,7 @@ function Register() {
                     </div>
 
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
+                        <label htmlFor="email" className="block text-lg font-medium mb-1">Email</label>
                         <input
                             id="email"
                             type="text"
@@ -70,7 +73,9 @@ function Register() {
                     </div>
 
                     <div>
-                        <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
+                        <label htmlFor="password" className="block text-lg font-medium mb-1">Password</label>
+                        <div className="block text-xs font-medium mb-1">*Passwords must be at least 8 characters long and contain a number, uppercase letter, and lowercase letter.</div>
+  
                         <input
                             id="password"
                             type="password"
@@ -81,7 +86,7 @@ function Register() {
                     </div>
 
                     <div>
-                        <label htmlFor="reenter" className="block text-sm font-medium mb-1">Re-enter Password</label>
+                        <label htmlFor="reenter" className="block text-lg font-medium mb-1">Re-enter Password</label>
                         <input
                             id="reenter"
                             type="password"
@@ -99,7 +104,7 @@ function Register() {
                     Register
                 </button>
 
-                <div className="text-center text-sm mt-4">
+                <div className="text-center text-lg mt-4">
                     <span>Already have an account? </span>
                     <span onClick={() => navigate("/login")} className={linkStyle}>Login</span>
                 </div>

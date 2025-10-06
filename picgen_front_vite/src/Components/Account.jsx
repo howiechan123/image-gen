@@ -6,7 +6,7 @@ import ButtonWrapper from "./ButtonWrapper";
 import { useToken } from "./TokenContext";
 import { useNavigate } from "react-router-dom";
 import { deleteUser, updateUser } from "../api/AuthAPI";
-import { isValidEmail } from "../Util/validateEmail";
+import { isValidEmail, isValidPassword } from "../Util/validateStrings";
 
 const Account = () => {
   const { user, setUser } = useUser();
@@ -179,6 +179,7 @@ const Account = () => {
               isEditingPassword ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
             }`}
           >
+          <div className="block text-xs font-medium mb-1">*Passwords must be at least 8 characters long and contain a number, uppercase letter, and lowercase letter.</div>
             <div className="flex gap-3 items-center">
               <input
                 type="password"
@@ -213,7 +214,7 @@ const Account = () => {
                 placeholder="Retype password..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
-              <ButtonWrapper clickable={tempPassword === retypePassword}>
+              <ButtonWrapper clickable={tempPassword === retypePassword && isValidPassword(tempPassword)}>
               <button
                 onClick={confirmPassword}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
