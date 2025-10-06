@@ -6,6 +6,7 @@ import ButtonWrapper from "./ButtonWrapper";
 import { useToken } from "./TokenContext";
 import { useNavigate } from "react-router-dom";
 import { deleteUser, updateUser } from "../api/AuthAPI";
+import { isValidEmail } from "../Util/validateEmail";
 
 const Account = () => {
   const { user, setUser } = useUser();
@@ -149,7 +150,7 @@ const Account = () => {
                 placeholder="Enter new email..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
-              <ButtonWrapper clickable={tempEmail != null && tempEmail.length > 0}>
+              <ButtonWrapper clickable={isValidEmail(tempEmail)}>
               <button
                 onClick={() => confirmEmail()}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"

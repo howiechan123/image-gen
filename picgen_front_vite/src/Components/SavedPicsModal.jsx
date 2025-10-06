@@ -27,7 +27,6 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
     const touchEndY = e.changedTouches[0].clientY;
     const deltaY = touchEndY - touchStartY.current;
     if (deltaY > 100) {
-      // Swipe down threshold
       onClose();
     }
     touchStartY.current = null;

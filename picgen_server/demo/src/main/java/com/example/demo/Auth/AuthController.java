@@ -45,7 +45,6 @@ public class AuthController {
     
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable("id") Long id, @CookieValue(value="refreshToken", required=false) String refreshToken, HttpServletResponse response){
-        System.out.println("XXXXXXXXXXXXXXXXXXX" + refreshToken);
         return authService.deleteUserById(id, refreshToken, response);
     }
 

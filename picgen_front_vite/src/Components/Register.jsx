@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { register } from "../api/AuthAPI";
 import { useToken } from "./TokenContext";
+import { isValidEmail } from "../Util/validateEmail";
 
 function Register() {
     const [name, setName] = useState("");
@@ -13,6 +14,9 @@ function Register() {
     const { changeToken } = useToken();
 
     const handleRegister = async () => {
+        if(!isValidEmail(email)){
+            return window.alert("Enter a valid email");
+        }
         if (!name || !email || !password || !reenter) {
             return window.alert("Please fill out all fields to sign up");
         }
@@ -44,7 +48,7 @@ function Register() {
 
                 <div className="space-y-4">
                     <div>
-                        <label htmlFor="name" className="block text-sm font-medium mb-1">Name</label>
+                        <label htmlFor="name" className="block text-sm font-medium mb-1">Username</label>
                         <input
                             id="name"
                             type="text"

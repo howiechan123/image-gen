@@ -39,7 +39,6 @@ export const setupInterceptors = (tokenContext) => {
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
-      console.log("XXXXXXXXXXXXX", originalRequest.headers.Authorization);
 
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
@@ -53,9 +52,6 @@ export const setupInterceptors = (tokenContext) => {
           curToken = newToken;
           tokenContext.changeToken(newToken, user);
           originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-
-          console.log("OOOOOOOOOOOOOOOO", originalRequest.headers.Authorization);
-          console.log("RRRRRRRRRRRRRRRR", refreshRes.data.token);
 
           return SpringAPI(originalRequest);
         } catch (refreshError) {
