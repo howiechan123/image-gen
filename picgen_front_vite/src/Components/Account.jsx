@@ -26,24 +26,26 @@ const Account = () => {
   const [retypePassword, setRetypePassword] = useState("");
 
   const toggleEditing = (field) => {
-    
-    setIsEditingName(field === "name" ? !isEditingName : false);
-    setIsEditingEmail(field === "email" ? !isEditingEmail : false);
-    setIsEditingPassword(field === "password" ? !isEditingPassword : false);
-    setIsDeletingAccount(field === "delete" ? !isDeletingAccount : false);
+    const newIsEditingName = field === "name" ? !isEditingName : false;
+    const newIsEditingEmail = field === "email" ? !isEditingEmail : false;
+    const newIsEditingPassword = field === "password" ? !isEditingPassword : false;
+    const newIsDeletingAccount = field === "delete" ? !isDeletingAccount : false;
 
-    
-    if (field !== "name") setTempName("");
-    if (field !== "email") setTempEmail("");
-    if (field !== "password") setTempPassword("");
-    if (field !== "delete") setDeleteInput("");
+    setIsEditingName(newIsEditingName);
+    setIsEditingEmail(newIsEditingEmail);
+    setIsEditingPassword(newIsEditingPassword);
+    setIsDeletingAccount(newIsDeletingAccount);
 
-    
-    if(!isEditingName) setTempName("");
-    if(!isEditingEmail) setTempEmail("");
-    if(!isEditingPassword) setTempPassword("");
-    if(!isDeletingAccount) setDeleteInput("");
+    if (!newIsEditingName) setTempName("");
+    if (!newIsEditingEmail) setTempEmail("");
+    if (!newIsEditingPassword) {
+      setTempPassword("");
+      setRetypePassword("");
+    }
+    if (!newIsDeletingAccount) setDeleteInput("");
   };
+
+
 
   const confirmName = async() => {
     const response = await updateUser(user.id, tempName, null, null);
@@ -180,7 +182,11 @@ const Account = () => {
               <input
                 type="password"
                 value={tempPassword}
-                onChange={(e) => setTempPassword(e.target.value)}
+                onChange={(e) => 
+                    {const val = e.target.value;
+                    setTempPassword(val);
+                    if (val === "") setRetypePassword("");}
+                }
                 placeholder="Enter new password..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
