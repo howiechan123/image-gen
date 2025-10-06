@@ -30,7 +30,7 @@ public class ImgBBService {
             base64Image = base64Image.substring(base64Image.indexOf(",") + 1);
         }
 
-        String url = "https://api.imgbb.com/1/upload?key=" + apiKey + "&expiration=600";
+        String url = "https://api.imgbb.com/1/upload?key=" + apiKey;
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("image", base64Image);

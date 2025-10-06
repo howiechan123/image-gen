@@ -66,8 +66,11 @@ public class PictureController {
     public void changePictureName(@PathVariable("pictureId") Long pictureId, @RequestBody changeNameDTO dto){
         pictureService.changePictureName(pictureId, dto.newName);
     }
-    
-   
+
+    // @GetMapping(path ="{pictureId}")
+    // public void downloadPicture(@PathVariable("pictureId") Long pictureId) {
+
+    // }
 
     public record pictureRequestDTO(String fileName, String filePath) {
 

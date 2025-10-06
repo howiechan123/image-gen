@@ -68,7 +68,9 @@ public class PictureService {
         System.out.println("file name changed");
     }
 
-    
+    // public void downLoadPicture(Long pictureId, String filename) {
+
+    // }
 
     public record pictureResponse(pictureDTO dto, String message, boolean success) {
 

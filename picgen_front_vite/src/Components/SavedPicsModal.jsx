@@ -32,6 +32,16 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
     touchStartY.current = null;
   };
 
+  function downloadFile(url, filename) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename; // optional hint to browser
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -62,9 +72,7 @@ function SavedPicsModal({ isOpen, image, onClose, onDelete }) {
             <div className="absolute right-6 bottom-1/2 transform translate-y-1/2 flex flex-col gap-4">
               <button
                 className="w-12 h-12 bg-white/30 hover:bg-white/50 text-white rounded-full flex items-center justify-center shadow-lg transition"
-                onClick={() => {
-                  console.log("Download clicked");
-                }}
+                onClick={() => downloadFile(image.filePath,"e")}
               >
                 <FaDownload size={20} />
               </button>

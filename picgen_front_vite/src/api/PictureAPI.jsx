@@ -43,3 +43,4 @@ export const editPictureName = async(picId, newName) => {
         throw new Error(err);
     }
 }
+
