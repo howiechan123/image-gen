@@ -28,3 +28,14 @@ export const logout = async() => {
     throw new Error(err.response?.data?.message || "Log out failed");
   }
 }
+
+export const deleteUser = async(userId) => {
+    try{
+        const response = await SpringAPI.delete(`public/auth/${userId}`);
+        return response;
+        
+    }
+    catch(err){
+        throw new Error(err);
+    }
+}

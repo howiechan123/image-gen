@@ -9,3 +9,4 @@ export const updateUser = async(userId, name, email, password) => {
         throw new Error(err);
     }
 }
+

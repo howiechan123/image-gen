@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+
 
 import jakarta.transaction.Transactional;
 
@@ -14,6 +17,7 @@ public class UserService {
     
     
     private final UserRepository userRepository;
+
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -51,17 +55,6 @@ public class UserService {
         
     }
 
-    public boolean deleteUserById(Long id){
-        boolean exists = userRepository.existsById(id);
-        
-        if(!exists) {
-            throw new IllegalStateException("user " + id + " does not exist");
-        }
-        userRepository.deleteById(id);
-        System.out.println("user deleted");
-        return exists;
-    }
-
     @Transactional
     public ResponseEntity<?> updateUser(Long userId, String name, String email, String password) {
         
@@ -77,7 +70,6 @@ public class UserService {
             user.setPassword(password);
         }
 
-        
 
         userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
         System.out.println(dto);

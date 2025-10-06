@@ -4,9 +4,14 @@ import { useUser } from "./UserContext";
 import { FaEdit } from "react-icons/fa";
 import ButtonWrapper from "./ButtonWrapper";
 import { updateUser } from "../api/UserAPI";
+import { useToken } from "./TokenContext";
+import { useNavigate } from "react-router-dom";
+import { deleteUser } from "../api/AuthAPI";
 
 const Account = () => {
   const { user, setUser } = useUser();
+  const {changeToken} = useToken();
+  const navigate = useNavigate();
   
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -18,6 +23,7 @@ const Account = () => {
   const [tempEmail, setTempEmail] = useState("");
   const [tempPassword, setTempPassword] = useState("");
   const [deleteInput, setDeleteInput] = useState("");
+  const [retypePassword, setRetypePassword] = useState("");
 
   const toggleEditing = (field) => {
     
@@ -31,6 +37,12 @@ const Account = () => {
     if (field !== "email") setTempEmail("");
     if (field !== "password") setTempPassword("");
     if (field !== "delete") setDeleteInput("");
+
+    
+    if(!isEditingName) setTempName("");
+    if(!isEditingEmail) setTempEmail("");
+    if(!isEditingPassword) setTempPassword("");
+    if(!isDeletingAccount) setDeleteInput("");
   };
 
   const confirmName = async() => {
@@ -50,17 +62,20 @@ const Account = () => {
   };
 
   const confirmPassword = async() => {
-    const response = await updateUser(user.id, null, null, tempPassword);
+    // const response = await updateUser(user.id, null, null, tempPassword);
     setIsEditingPassword(false);
     setTempPassword("");
-    return response;
+    console.log("ppp");
+    // return response;
   };
 
-  const handleDeleteAccount = () => {
-    console.log("Account deleted!");
-    
+  const handleDeleteAccount = async() => {
+    const response = await deleteUser(user.id);
+    changeToken(null, null);
     setIsDeletingAccount(false);
     setDeleteInput("");
+    navigate("/login");
+    return response;
   };
 
   return (
@@ -115,7 +130,7 @@ const Account = () => {
               className="text-gray-400 hover:text-white"
               onClick={() => toggleEditing("email")}
             >
-              <FaEdit size={18} />
+              <FaEdit size={20} />
             </button>
           </div>
 
@@ -152,7 +167,7 @@ const Account = () => {
               className="text-gray-400 hover:text-white"
               onClick={() => toggleEditing("password")}
             >
-              <FaEdit size={18} />
+              <FaEdit size={20} />
             </button>
           </div>
 
@@ -169,7 +184,29 @@ const Account = () => {
                 placeholder="Enter new password..."
                 className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
-              <ButtonWrapper clickable={tempPassword != null && tempPassword.length > 0}>
+              <ButtonWrapper clickable={false}>
+              <button
+                className="invisible"
+              >
+                xxxxxxxxxxxx
+              </button>
+              </ButtonWrapper>
+            </div>
+          </div>
+          <div
+            className={`transition-all duration-100 ease-in-out overflow-hidden ${
+              tempPassword != "" ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="flex gap-3 items-center">
+              <input
+                type="password"
+                value={retypePassword}
+                onChange={(e) => setRetypePassword(e.target.value)}
+                placeholder="Retype password..."
+                className="flex-1 px-3 py-2 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+              <ButtonWrapper clickable={tempPassword === retypePassword}>
               <button
                 onClick={confirmPassword}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
@@ -211,8 +248,8 @@ const Account = () => {
                 disabled={deleteInput !== "DELETE"}
                 className={`px-4 py-2 rounded-lg ${
                   deleteInput === "DELETE"
-                    ? "bg--600 hover:bg-red-500"
-                    : "bg-red-800 cursor-not-allowed"
+                    ? "bg--600 bg-red-500 hover:bg-red-600"
+                    : "bg-red-950 cursor-not-allowed"
                 }`}
               >
                 Delete

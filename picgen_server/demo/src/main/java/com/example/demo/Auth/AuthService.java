@@ -105,7 +105,6 @@ public class AuthService {
         if (refreshToken != null) {
             java.util.Date expiry = jwtUtil.extractClaim(refreshToken, Claims::getExpiration);
             blacklistRepo.save(new BlacklistedToken(refreshToken, new java.sql.Date(expiry.getTime())));
-
         }
 
         // Clear cookie
@@ -120,6 +119,35 @@ public class AuthService {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    
+    public ResponseEntity<?> deleteUserById(Long id, String refreshToken, HttpServletResponse response){
+        boolean exists = userRepository.existsById(id);
+        
+        if(!exists) {
+            throw new IllegalStateException("user " + id + " does not exist");
+        }
+
+        if (refreshToken != null) {
+            java.util.Date expiry = jwtUtil.extractClaim(refreshToken, Claims::getExpiration);
+            blacklistRepo.save(new BlacklistedToken(refreshToken, new java.sql.Date(expiry.getTime())));
+        }
+
+        // Clear cookie
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+            .httpOnly(true)
+            .secure(false)
+            .path("/public/auth")
+            .maxAge(0)
+            .sameSite("Strict")
+            .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        userRepository.deleteById(id);
+        System.out.println("user deleted");
+
+        return ResponseEntity.ok("Deleted account successfully");
     }
 
     public record loginResponse(userDTO user, String message, boolean success, String token) {

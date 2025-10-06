@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpServletResponse;
+
+import jakarta.servlet.http.HttpServlet;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -42,17 +46,6 @@ public class UserController {
         userService.addUser(user);
     }
 
-    @DeleteMapping(path = "{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id){
-        boolean isDeleted = userService.deleteUserById(id);
-
-        if(isDeleted){
-            return ResponseEntity.noContent().build();
-        }
-        else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
     @PutMapping(path = "{id}")
     public ResponseEntity<?> updateUser(@PathVariable("id") Long userId, @RequestBody updateUserDTO dto) {
