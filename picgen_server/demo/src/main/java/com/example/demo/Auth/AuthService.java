@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.CookieValue;
 import com.example.demo.JWT.JWTUtil;
 import com.example.demo.User.User;
 import com.example.demo.User.UserRepository;
+import com.example.demo.User.UserService.userResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 
 @Service
 public class AuthService {
@@ -24,12 +27,14 @@ public class AuthService {
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
     private final BlacklistedTokenRepository blacklistRepo;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthService(UserRepository userRepository, JWTUtil jwtUtil, BlacklistedTokenRepository blacklistRepo) {
+    public AuthService(UserRepository userRepository, JWTUtil jwtUtil, BlacklistedTokenRepository blacklistRepo, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.blacklistRepo = blacklistRepo;
+        this.passwordEncoder = passwordEncoder;
     }
     
 
@@ -68,7 +73,7 @@ public class AuthService {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new loginResponse(userDto, "Login Success", true, accessToken));
+                .body(new authResponse(userDto, "Login Success", true, accessToken));
     }
 
 
@@ -93,7 +98,7 @@ public class AuthService {
             userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
  
             String newAccessToken = jwtUtil.generateToken(Long.valueOf(userId));
-            return ResponseEntity.ok(new loginResponse(dto, "Token refreshed", true, newAccessToken));
+            return ResponseEntity.ok(new authResponse(dto, "Token refreshed", true, newAccessToken));
 
         } catch (Exception e) {
   
@@ -150,11 +155,55 @@ public class AuthService {
         return ResponseEntity.ok("Deleted account successfully");
     }
 
-    public record loginResponse(userDTO user, String message, boolean success, String token) {
+
+    @Transactional
+    public ResponseEntity<?> updateUser(Long userId, String name, String email, String password, HttpServletResponse response, String refreshToken) {
+        
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalStateException("user id does not exist"));
+
+        if(name != null && name.length() > 0){
+            user.setName(name);
+        }
+        if(email != null && email.length() > 0){
+            user.setEmail(email);
+        }
+        if(password != null && password.length() > 0){
+
+        String newHash = passwordEncoder.encode(password);
+        user.setPassword(newHash);
+
+            if (refreshToken != null) {
+            java.util.Date expiry = jwtUtil.extractClaim(refreshToken, Claims::getExpiration);
+            blacklistRepo.save(new BlacklistedToken(refreshToken, new java.sql.Date(expiry.getTime())));
+            }
+
+            // Clear cookie
+            ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/public/auth")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        }
+
+
+        userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
+        return ResponseEntity.ok(new userResponse(dto, "User updated", true));
+    }
+
+    public record authResponse(userDTO user, String message, boolean success, String token) {
 
     };
     
     public record userDTO(Long id, String name, String email) {
     
+    };
+
+    public record userResponse(userDTO dto, String message, boolean success){
+
     };
 }

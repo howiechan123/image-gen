@@ -47,13 +47,5 @@ public class UserController {
     }
 
 
-    @PutMapping(path = "{id}")
-    public ResponseEntity<?> updateUser(@PathVariable("id") Long userId, @RequestBody updateUserDTO dto) {
-        
-        return userService.updateUser(userId, dto.name, dto.email, dto.password);
-    }
 
-    public record updateUserDTO(String name, String email, String password){
-
-    }
 }

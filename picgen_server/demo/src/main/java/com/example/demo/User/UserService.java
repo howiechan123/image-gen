@@ -55,26 +55,7 @@ public class UserService {
         
     }
 
-    @Transactional
-    public ResponseEntity<?> updateUser(Long userId, String name, String email, String password) {
-        
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalStateException("user id does not exist"));
 
-        if(name != null && name.length() > 0){
-            user.setName(name);
-        }
-        if(email != null && email.length() > 0){
-            user.setEmail(email);
-        }
-        if(password != null && password.length() > 0){
-            user.setPassword(password);
-        }
-
-
-        userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
-        System.out.println(dto);
-        return ResponseEntity.ok(new userResponse(dto, "User updated", true));
-    }
     
     public record userResponse(userDTO dto, String message, boolean success){
 

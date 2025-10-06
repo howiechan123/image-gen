@@ -31,7 +31,7 @@ public class SecurityConfig{
             .cors().and()
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/public/**").permitAll()
+                .requestMatchers("/public/auth/login", "/public/register", "/public/auth/refresh").permitAll()
                 .anyRequest().authenticated()
                 // .anyRequest().permitAll()
             )

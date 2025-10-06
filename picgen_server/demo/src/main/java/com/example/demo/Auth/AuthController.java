@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +26,7 @@ public class AuthController {
 
     
 
-    @PostMapping
+    @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody AuthRequest loginRequest) {
         
         return authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
@@ -46,6 +47,16 @@ public class AuthController {
     public ResponseEntity<?> deleteUser(@PathVariable("id") Long id, @CookieValue(value="refreshToken", required=false) String refreshToken, HttpServletResponse response){
         System.out.println("XXXXXXXXXXXXXXXXXXX" + refreshToken);
         return authService.deleteUserById(id, refreshToken, response);
+    }
+
+    @PutMapping(path = "{id}")
+    public ResponseEntity<?> updateUser(@PathVariable("id") Long userId, @RequestBody updateUserDTO dto, HttpServletResponse response, @CookieValue(value="refreshToken", required=false) String refreshToken) {
+        
+        return authService.updateUser(userId, dto.name(), dto.email(), dto.password(), response, refreshToken);
+    }
+
+    public record updateUserDTO(String name, String email, String password){
+
     }
 
 

@@ -2,7 +2,7 @@ import SpringAPI from "./SpringAPI";
 
 export const login = async (email, password) => {
   try {
-    const response = await SpringAPI.post("public/auth", { email, password });
+    const response = await SpringAPI.post("public/auth/login", { email, password });
     return response;
   } catch (err) {
     throw new Error(err.response?.data?.message || "Login failed");
@@ -34,6 +34,16 @@ export const deleteUser = async(userId) => {
         const response = await SpringAPI.delete(`public/auth/${userId}`);
         return response;
         
+    }
+    catch(err){
+        throw new Error(err);
+    }
+}
+
+export const updateUser = async(userId, name, email, password) => {
+    try{
+        const response = await SpringAPI.put(`public/auth/${userId}`, {name, email, password});
+        return response;
     }
     catch(err){
         throw new Error(err);

@@ -3,10 +3,9 @@ import Header from "./Header";
 import { useUser } from "./UserContext";
 import { FaEdit } from "react-icons/fa";
 import ButtonWrapper from "./ButtonWrapper";
-import { updateUser } from "../api/UserAPI";
 import { useToken } from "./TokenContext";
 import { useNavigate } from "react-router-dom";
-import { deleteUser } from "../api/AuthAPI";
+import { deleteUser, updateUser } from "../api/AuthAPI";
 
 const Account = () => {
   const { user, setUser } = useUser();
@@ -64,11 +63,12 @@ const Account = () => {
   };
 
   const confirmPassword = async() => {
-    // const response = await updateUser(user.id, null, null, tempPassword);
+    const response = await updateUser(user.id, null, null, tempPassword);
     setIsEditingPassword(false);
     setTempPassword("");
-    console.log("ppp");
-    // return response;
+    changeToken(null, null);
+    navigate("/login");
+    return response;
   };
 
   const handleDeleteAccount = async() => {
