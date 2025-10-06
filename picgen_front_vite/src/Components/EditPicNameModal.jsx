@@ -34,7 +34,7 @@ const EditPicNameModal = ({ isEditModalOpen, closeEditModal, image }) => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.85, opacity: 0 }}
             transition={{ duration: 0.1, ease: "easeInOut" }}
-            className="bg-gray-900 text-white rounded-lg shadow-lg p-6 w-full max-w-sm flex flex-col items-center gap-4"
+            className="bg-gray-900 text-white rounded-lg shadow-lg p-4 w-full max-w-sm flex flex-col items-center gap-4"
             onClick={(e) => e.stopPropagation()} // prevent close when clicking inside
           >
 
@@ -46,7 +46,7 @@ const EditPicNameModal = ({ isEditModalOpen, closeEditModal, image }) => {
               placeholder="Enter new name..."
             />
 
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-45 mt-1">
               <ButtonWrapper clickable={newName != null && newName.length > 0}>
                 <button
                   onClick={() => edit(image.picId, newName)}

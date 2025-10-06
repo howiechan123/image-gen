@@ -65,9 +65,9 @@ const Header = ({ isGuest }) => {
   };
 
   return (
-<header className="sticky top-0 z-50 w-full max-w-4xl mx-auto
+<header className="sticky top-0 z-50 w-full max-w-6xl mx-auto
                    bg-gray-950
-                   flex flex-col md:flex-row md:justify-end md:space-x-5 py-2">
+                   flex flex-col md:flex-row md:justify-end md:space-x-5 py-2 border-b border-gray-700">
 
       
       {/* Mobile title and hamburger */}

@@ -43,7 +43,7 @@ function SavedPics() {
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
       <Header isGuest={false} />
 
-      <div className="max-w-xl mx-auto mt-10 space-y-8">
+      <div className="max-w-6xl mx-auto ">
 
         <div className="grid grid-cols-3 gap-0 mt-6">
           {pics.map((p, idx) => (

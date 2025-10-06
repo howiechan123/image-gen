@@ -31,7 +31,7 @@ const ConfirmDeleteModal = ({ isDeleteModalOpen, image, onDelete, close }) => {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.85, opacity: 0 }}
             transition={{ duration: 0.1, ease: "easeInOut" }}
-            className="bg-gray-900 text-white rounded-lg shadow-lg p-6 w-full max-w-sm flex flex-col items-center gap-4"
+            className="bg-gray-900 text-white rounded-lg shadow-lg p-4 w-full max-w-sm flex flex-col items-center gap-2"
             onClick={(e) => e.stopPropagation()} // prevent backdrop close on inner click
           >
             <p className="text-center">
@@ -39,7 +39,7 @@ const ConfirmDeleteModal = ({ isDeleteModalOpen, image, onDelete, close }) => {
               cannot be undone.
             </p>
 
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-40 mt-1">
               <button
                 onClick={deletePic}
                 className="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-500 transition"
