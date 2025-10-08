@@ -29,7 +29,7 @@ const Guest = ({ isGuest = true }) => {
     setGenerating(true);
     openModal();
 
-    const data = { prompt };
+    const data = { prompt, dimensions: 512, inference_steps: 25, guidance_scale:10 };
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/generate-image",
@@ -92,6 +92,21 @@ const Guest = ({ isGuest = true }) => {
             className="w-full h-32 px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
             placeholder="Describe your pixel art idea..."
           ></textarea>
+
+          {/* <select>
+            Inference Steps
+            <option value={10}/>
+            <option value={15}/>
+            <option value={25}/>
+            <option value={50}/>
+          </select>
+                    <select>
+            Guidance Scale
+            <option value={5}/>
+            <option value={7}/>
+            <option value={9}/>
+            <option value={10}/>
+          </select> */}
 
           <div className="flex justify-center">
             <ButtonWrapper
