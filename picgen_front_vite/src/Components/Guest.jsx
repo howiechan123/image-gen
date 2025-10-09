@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import ImageModal from "./ImageModal";
-import loadgif from "./loading.gif";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ButtonWrapper from "./ButtonWrapper";

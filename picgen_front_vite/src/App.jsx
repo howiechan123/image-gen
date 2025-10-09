@@ -5,7 +5,7 @@ import Home from './Components/Home.jsx';
 import SavedPics from './Components/SavedPics.jsx';
 import Guest from './Components/Guest.jsx';
 import Account from './Components/Account.jsx';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import { TokenProvider, useToken } from './Components/TokenContext.jsx';
 import ProtectedRoute from './Components/ProtectedRoute.jsx';
 import { setupInterceptors } from './api/SpringAPI';
@@ -14,9 +14,10 @@ import { UserProvider } from './Components/UserContext.jsx';
 
 const AppContent = () => {
   const tokenContext = useToken();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setupInterceptors(tokenContext);
+    setupInterceptors(tokenContext, navigate);
   }, [tokenContext]);
 
   return (

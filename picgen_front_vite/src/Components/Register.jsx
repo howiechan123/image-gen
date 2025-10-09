@@ -34,7 +34,6 @@ function Register() {
             if (response.data.success) {
                 navigate("/home");
             } else {
-                console.log(response);
                 window.alert("User already exists");
             }
         } catch (error) {

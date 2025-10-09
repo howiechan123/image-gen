@@ -21,7 +21,7 @@ function SavedPics() {
         setPics(mapped);
       }
     } catch (error) {
-      console.log(error);
+      return new Error(err);
     }
   };
 

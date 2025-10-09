@@ -21,7 +21,6 @@ export const register = async (name, email, password) => {
 export const logout = async() => {
   try{
     const response = await SpringAPI.post("public/auth/logout");
-    console.log("logged out", response);
     return response;
   }
   catch(err){
@@ -30,22 +29,22 @@ export const logout = async() => {
 }
 
 export const deleteUser = async(userId) => {
-    try{
-        const response = await SpringAPI.delete(`public/auth/${userId}`);
-        return response;
-        
-    }
-    catch(err){
-        throw new Error(err);
-    }
+  try{
+      const response = await SpringAPI.delete(`public/auth/${userId}`);
+      return response;
+      
+  }
+  catch(err){
+      throw new Error(err);
+  }
 }
 
 export const updateUser = async(userId, name, email, password) => {
-    try{
-        const response = await SpringAPI.put(`public/auth/${userId}`, {name, email, password});
-        return response;
-    }
-    catch(err){
-        throw new Error(err);
-    }
+  try{
+      const response = await SpringAPI.put(`public/auth/${userId}`, {name, email, password});
+      return response;
+  }
+  catch(err){
+      throw new Error(err);
+  }
 }
