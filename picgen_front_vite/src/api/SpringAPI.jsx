@@ -58,7 +58,6 @@ export const setupInterceptors = (tokenContext, navigate) => {
           return Promise.reject(refreshError);
         }
       }
-      console.log("sfgdfdf")
       return Promise.reject(error);
     }
   );

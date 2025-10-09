@@ -37,12 +37,12 @@ public class JWTUtil {
                 .compact();
     }
 
-    public String generateRefreshToken(Long userId) {
+    public String generateRefreshToken(Long userId, int tokenVersion) {
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
-                .setId(UUID.randomUUID().toString())
+                .claim("tokenVersion", tokenVersion)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 5))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -51,9 +51,10 @@ public class JWTUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public String extractJti(String token) {
-        return extractClaim(token, Claims::getId);
+    public Integer extractTokenVersion(String token) {
+        return extractClaim(token, claims -> claims.get("tokenVersion", Integer.class));
     }
+
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = Jwts.parserBuilder()

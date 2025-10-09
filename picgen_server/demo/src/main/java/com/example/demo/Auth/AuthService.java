@@ -7,7 +7,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CookieValue;
 
@@ -52,20 +51,20 @@ public class AuthService {
     public ResponseEntity<?> authenticate(String email, String password) {
         User user = userRepository.findUserByEmail(email).orElse(null);
 
-        if (user == null || !BCrypt.checkpw(password, user.getPassword())) {
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials");
         }
 
         
         String accessToken = jwtUtil.generateToken(user.getId());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getId());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId(), user.getTokenVersion());
 
         
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(false) // set false if testing locally without https
                 .path("/public/auth")
-                .maxAge(7 * 24 * 60 * 60) // 7 days
+                .maxAge(60 * 60 * 5) // 5 hours
                 .sameSite("Strict")
                 .build();
 
@@ -78,33 +77,59 @@ public class AuthService {
 
 
 
-    public ResponseEntity<?> refresh(String refreshToken) {
+   public ResponseEntity<?> refresh(String refreshToken) {
         if (refreshToken == null || isBlacklisted(refreshToken)) {
-
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
 
-
         try {
             String userId = jwtUtil.extractUserId(refreshToken);
-            
+            Integer tokenVersionFromToken = jwtUtil.extractTokenVersion(refreshToken);
 
-            if (!jwtUtil.validateToken(refreshToken, userId)) {
-
+            if (userId == null || tokenVersionFromToken == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
             }
 
             User user = userRepository.findUserById(Long.valueOf(userId)).orElse(null);
-            userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
- 
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+
+            if (!tokenVersionFromToken.equals(user.getTokenVersion())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Expired or revoked refresh token");
+            }
+
+            if (!jwtUtil.validateToken(refreshToken, userId)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired refresh token");
+            }
+
+            user.setTokenVersion(user.getTokenVersion() + 1);
+            userRepository.save(user);
+
             String newAccessToken = jwtUtil.generateToken(Long.valueOf(userId));
-            return ResponseEntity.ok(new authResponse(dto, "Token refreshed", true, newAccessToken));
+            String newRefreshToken = jwtUtil.generateRefreshToken(Long.valueOf(userId), user.getTokenVersion());
+
+
+            ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/public/auth")
+                    .maxAge(60 * 60 * 5)
+                    .sameSite("Strict")
+                    .build();
+
+            userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
+            authResponse response = new authResponse(dto, "Token refreshed", true, newAccessToken);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(response);
 
         } catch (Exception e) {
-  
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired refresh token");
         }
     }
+
 
     public ResponseEntity<?> logout(HttpServletResponse response, @CookieValue(value = "refreshToken", required = false) String refreshToken) {
         if (refreshToken != null) {

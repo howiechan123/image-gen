@@ -26,6 +26,7 @@ public class User {
     private Long id;
     private String name;
     private String email;
+    private int tokenVersion = 0;
     @JsonIgnore
     private String password;
 
@@ -46,11 +47,12 @@ public class User {
 
     }
 
-    public User(Long id, String name, String email, String password){
+    public User(Long id, String name, String email, String password, int version){
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
+        this.tokenVersion = version;
 
     }
 
@@ -105,6 +107,14 @@ public class User {
 
     public void setPictures(List<Picture> pictures) {
         this.pictures = pictures;
+    }
+
+    public int getTokenVersion() {
+        return tokenVersion;
+    }
+
+    public void setTokenVersion(int tokenVersion) {
+        this.tokenVersion = tokenVersion;
     }
 
     

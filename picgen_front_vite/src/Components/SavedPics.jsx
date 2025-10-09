@@ -20,7 +20,7 @@ function SavedPics() {
         }));
         setPics(mapped);
       }
-    } catch (error) {
+    } catch (err) {
       return new Error(err);
     }
   };
