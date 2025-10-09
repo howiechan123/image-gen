@@ -89,7 +89,7 @@ const Guest = ({ isGuest = true }) => {
             onChange={updatePrompt}
             value={prompt}
             className="w-full h-32 px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
-            placeholder="Describe your pixel art idea..."
+            placeholder="Enter a prompt..."
           ></textarea>
 
           {/* <select>

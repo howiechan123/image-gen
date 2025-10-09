@@ -52,6 +52,8 @@ export const setupInterceptors = (tokenContext, navigate) => {
           originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
           return SpringAPI(originalRequest);
         } catch (refreshError) {
+          SpringAPI.interceptors.request.eject(requestInterceptor);
+          SpringAPI.interceptors.response.eject(responseInterceptor);
           navigate("/login");
           return Promise.reject(refreshError);
         }
