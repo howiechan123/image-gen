@@ -44,8 +44,8 @@ public class JWTRequestFilter extends OncePerRequestFilter {
                 if (userId != null && jwtUtil.validateToken(token, userId)) {
                     // userId used as the "username"
                     UserDetails userDetails = User.withUsername(userId)
-                                                  .password("") // no password needed for JWT
-                                                  .roles("USER") // default role
+                                                  .password("")
+                                                  .roles("USER")
                                                   .build();
 
                     UsernamePasswordAuthenticationToken authenticationToken =

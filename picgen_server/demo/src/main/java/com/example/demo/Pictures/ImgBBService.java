@@ -50,7 +50,6 @@ public class ImgBBService {
                 String imageUrl = (String) data.get("url");
                 String deleteUrl = (String) data.get("delete_url");
 
-                // Generate a default file name from the URL or timestamp
                 String fileName = "img_" + System.currentTimeMillis();
                 imgBBDTO dto = new imgBBDTO(fileName, imageUrl, deleteUrl);
 

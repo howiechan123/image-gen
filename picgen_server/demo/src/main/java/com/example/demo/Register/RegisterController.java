@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.config.RateLimit;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/public/register")
 public class RegisterController {

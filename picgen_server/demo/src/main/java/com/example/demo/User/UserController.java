@@ -23,7 +23,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import jakarta.servlet.http.HttpServlet;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(path= "api/Users")
 public class UserController {
