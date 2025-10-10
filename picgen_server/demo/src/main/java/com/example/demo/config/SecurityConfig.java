@@ -51,7 +51,7 @@ public class SecurityConfig{
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("https://howiechan-ai.vercel.app/")); // React dev server
+        config.setAllowedOrigins(List.of("https://howiechan-ai.vercel.app")); // React dev server
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(List.of("*"));
