@@ -32,12 +32,6 @@
     
     <dependencies>
 
-        <!-- <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency> -->
-
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -53,7 +47,7 @@
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId> <!-- Needed for JSON serialization/deserialization -->
+            <artifactId>jjwt-jackson</artifactId> 
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
