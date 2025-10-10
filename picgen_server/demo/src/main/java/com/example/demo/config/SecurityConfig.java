@@ -20,8 +20,10 @@ public class SecurityConfig{
 
     private final JWTRequestFilter jwtFilter;
 
+
     public SecurityConfig(JWTRequestFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
+
     }
 
     @Bean
@@ -35,7 +37,7 @@ public class SecurityConfig{
                 .anyRequest().authenticated()
                 // .anyRequest().permitAll()
             )
-            .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             ;
 
         return http.build();

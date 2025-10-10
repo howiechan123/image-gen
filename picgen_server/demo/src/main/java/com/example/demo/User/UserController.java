@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.config.RateLimit;
+
 import jakarta.servlet.http.HttpServletResponse;
 
 import jakarta.servlet.http.HttpServlet;
@@ -32,16 +35,19 @@ public class UserController {
     }
 
     @GetMapping
+    @RateLimit(limit = 50, period = 60)
     public List<User> getUsers(){
         return userService.getUsers();
     }
 
     @GetMapping("/email")
+    @RateLimit(limit = 50, period = 60)
     public Optional<User> getUserByEmail(@RequestParam("email") String email){
         return userService.getUserByEmail(email);
     }
 
     @PostMapping
+    @RateLimit(limit = 50, period = 60)
     public void postUser(@RequestBody User user){
         userService.addUser(user);
     }

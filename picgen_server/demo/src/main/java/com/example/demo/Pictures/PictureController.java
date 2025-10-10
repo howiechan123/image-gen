@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.User.User;
 import com.example.demo.User.UserService;
+import com.example.demo.config.RateLimit;
 
 @RestController
 @RequestMapping(path="api/Pictures")
@@ -32,12 +33,14 @@ public class PictureController {
     }
 
     @GetMapping
+    @RateLimit(limit = 50, period = 60)
     public List<Picture> getPictures(){
         return pictureService.getPictures();
     }
 
 
     @GetMapping("/user")
+    @RateLimit(limit = 50, period = 60)
     public ResponseEntity<?> getPicturesByUser() {
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -48,6 +51,7 @@ public class PictureController {
 
 
     @PostMapping(path="/save")
+    @RateLimit(limit = 50, period = 60)
     public ResponseEntity<?> savePicture(@RequestBody pictureRequestDTO dto) {
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -58,11 +62,13 @@ public class PictureController {
     }
 
     @DeleteMapping(path="{pictureId}")
+    @RateLimit(limit = 50, period = 60)
     public void deletePicture(@PathVariable("pictureId") Long pictureId){
         pictureService.deletePicture(pictureId);
     }
 
     @PutMapping(path="{pictureId}")
+    @RateLimit(limit = 50, period = 60)
     public void changePictureName(@PathVariable("pictureId") Long pictureId, @RequestBody changeNameDTO dto){
         pictureService.changePictureName(pictureId, dto.newName);
     }

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.config.RateLimit;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/public/register")
@@ -19,6 +21,7 @@ public class RegisterController {
     }
 
     @PostMapping
+    @RateLimit(limit = 50, period = 60)
     public RegisterResponse registerUser(@RequestBody RegisterRequest registerRequest) {
         return registerService.registerUser(registerRequest);
     }
