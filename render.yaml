@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: picgen-backend
+    env: java
+    region: virginia      
+    branch: main          
+    rootDirectory: picgen_server/demo
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/demo-0.0.1-SNAPSHOT.jar
+    plan: free
+    envVars:
+      - key: DB_URL
+        fromSecret: true # store as a Render secret
+      - key: DB_USERNAME
+        fromSecret: true
+      - key: DB_PASSWORD
+        fromSecret: true   
+      - key: JWT_SECRET_KEY
+        fromSecret: true   
+      - key: IMGBB_KEY
+        fromSecret: true   
