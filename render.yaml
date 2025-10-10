@@ -5,8 +5,6 @@ services:
     region: virginia      
     branch: main          
     rootDirectory: picgen_server/demo
-    buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -jar target/demo-0.0.1-SNAPSHOT.jar
     plan: free
     envVars:
       - key: DB_URL
