@@ -7,11 +7,12 @@ import { useUser } from "./UserContext";
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const { changeToken } = useToken();
+    const { changeToken, loading, setLoading } = useToken();
     const { setUser } = useUser();
     const navigate = useNavigate();
 
     const handleLogin = async () => {
+        setLoading(true);
         try {
             const response = await login(email, password);
 
@@ -24,6 +25,9 @@ function Login() {
             }
         } catch (error) {
             window.alert(error.message);
+        }
+        finally{
+            setLoading(false);
         }
     };
 
