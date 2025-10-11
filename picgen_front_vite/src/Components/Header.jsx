@@ -4,7 +4,7 @@ import { useToken } from "./TokenContext";
 import { logout } from "../api/AuthAPI";
 import { useUser } from "./UserContext";
 
-// Font Awesome imports
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faX } from "@fortawesome/free-solid-svg-icons";
 
@@ -29,10 +29,10 @@ const Header = ({ isGuest }) => {
   const openAccount = () => navigate("/account");
   const goHome = () => navigate("/home");
 
-  // Smooth menu closing handler
+  
   const handleNavClick = (callback) => {
-    setMobileMenuOpen(false); // start closing animation
-    setTimeout(callback, 50); // wait for transition to finish before navigating
+    setMobileMenuOpen(false);
+    setTimeout(callback, 50); 
   };
 
   const linkButton = `
@@ -50,16 +50,16 @@ const Header = ({ isGuest }) => {
     "/account": "Account",
     "/savedPics": "Saved Pictures",
   };
-  const currentPage = pageTitles[location.pathname] || "App";
+  const currentPage = pageTitles[location.pathname] || "Guest";
 
-  // Swipe handlers
+
   const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
   const handleTouchMove = (e) => { touchEndX.current = e.touches[0].clientX; };
   const handleTouchEnd = () => {
     const deltaX = touchStartX.current - touchEndX.current;
-    if (deltaX > 50) { // swipe left
+    if (deltaX > 50) {
         setMobileMenuOpen(false);
-    } else if (deltaX < -50) { // swipe right
+    } else if (deltaX < -50) {
         setMobileMenuOpen(false);
     }
   };
@@ -69,18 +69,15 @@ const Header = ({ isGuest }) => {
                    bg-gray-950
                    flex flex-col md:flex-row md:justify-end md:space-x-5 py-2 border-b border-gray-700">
 
-      
-      {/* Mobile title and hamburger */}
-      {!isGuest && (
-        <div className="flex justify-between items-center md:hidden px-4 mb-3">
-          <h1 className="text-white font-bold">{currentPage}</h1>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white text-xl">
-            <FontAwesomeIcon icon={mobileMenuOpen ? faX : faBars} />
-          </button>
-        </div>
-      )}
 
-      {/* Mobile Menu */}
+      <div className="flex justify-between items-center md:hidden px-4 mb-3">
+        <h1 className="text-white font-bold">{currentPage}</h1>
+        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white text-xl">
+          <FontAwesomeIcon icon={mobileMenuOpen ? faX : faBars} />
+        </button>
+      </div>
+
+
       <div
         className={`
             fixed top-0 right-0 h-full w-64 bg-gray-900 z-50
@@ -121,7 +118,7 @@ const Header = ({ isGuest }) => {
         )}
       </div>
 
-    </header>
+</header>
   );
 };
 
