@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-@Order(2)
 public class JWTRequestFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;

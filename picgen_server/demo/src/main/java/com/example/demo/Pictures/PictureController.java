@@ -53,7 +53,7 @@ public class PictureController {
     @PostMapping(path="/save")
     @RateLimit(limit = 50, period = 60)
     public ResponseEntity<?> savePicture(@RequestBody pictureRequestDTO dto) {
-
+        System.out.println("XXXXXXXXXXXXXXXX");
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = Long.valueOf(userDetails.getUsername());
         User user = new User(userId);

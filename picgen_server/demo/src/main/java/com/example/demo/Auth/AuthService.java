@@ -140,7 +140,7 @@ public class AuthService {
         // Clear cookie
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
             .httpOnly(true)
-            .secure(false)
+            .secure(true)
             .path("/public/auth")
             .maxAge(0)
             .sameSite("Strict")
@@ -167,7 +167,7 @@ public class AuthService {
         // Clear cookie
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
             .httpOnly(true)
-            .secure(false)
+            .secure(true)
             .path("/public/auth")
             .maxAge(0)
             .sameSite("Strict")
@@ -205,7 +205,7 @@ public class AuthService {
             // Clear cookie
             ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/public/auth")
                 .maxAge(0)
                 .sameSite("Strict")
