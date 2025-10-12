@@ -65,7 +65,7 @@ public class AuthService {
                 .secure(true) // set false if testing locally without https
                 .path("/public/auth")
                 .maxAge(60 * 60 * 5) // 5 hours
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
         userDTO userDto = new userDTO(user.getId(), user.getName(), user.getEmail());
@@ -115,7 +115,7 @@ public class AuthService {
                     .secure(true) // set false if testing locally without https
                     .path("/public/auth")
                     .maxAge(60 * 60 * 5)
-                    .sameSite("None")
+                    .sameSite("Lax")
                     .build();
 
             userDTO dto = new userDTO(user.getId(), user.getName(), user.getEmail());
@@ -143,7 +143,7 @@ public class AuthService {
             .secure(true)
             .path("/public/auth")
             .maxAge(0)
-            .sameSite("None")
+            .sameSite("Lax")
             .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -170,7 +170,7 @@ public class AuthService {
             .secure(true)
             .path("/public/auth")
             .maxAge(0)
-            .sameSite("None")
+            .sameSite("Lax")
             .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -208,7 +208,7 @@ public class AuthService {
                 .secure(true)
                 .path("/public/auth")
                 .maxAge(0)
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
