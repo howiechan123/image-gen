@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToken } from "./TokenContext";
 import { login } from "../api/AuthAPI";
 import { useUser } from "./UserContext";
+import Loading from "./Loading";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -38,6 +39,7 @@ function Login() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white px-4">
+            {loading && <Loading/>}
             <div className="w-full max-w-md bg-gray-900/80 backdrop-blur-md rounded-2xl shadow-2xl p-8">
                 <h1 className="text-2xl font-bold text-center mb-6">Generate AI art</h1>
                 <h2 className="text-lg font-semibold text-center mb-8">Login or Sign Up to Save Images</h2>
