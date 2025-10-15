@@ -31,7 +31,7 @@ const Guest = ({ isGuest = true }) => {
     const data = { prompt, dimensions: 512, inference_steps: 25, guidance_scale:10 };
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/generate-image",
+        "stablediffserver.duckdns.org/generate-image",
         data
       );
       if (response.data.success) {

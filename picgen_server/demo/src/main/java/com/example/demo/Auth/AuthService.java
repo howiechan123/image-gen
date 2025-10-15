@@ -62,7 +62,7 @@ public class AuthService {
         
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(true) // set false if testing locally without https
+                .secure(false) // set false if testing locally without https
                 .path("/public/auth")
                 .maxAge(60 * 60 * 5) // 5 hours
                 .sameSite("Lax")

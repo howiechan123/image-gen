@@ -1,3 +1,25 @@
+# services:
+#   fastapi:
+#     build: .
+#     container_name: pixel_model_api
+#     ports:
+#       - "8000:8000"
+#     restart: unless-stopped
+#     environment:
+#       - PYTHONUNBUFFERED=1
+#     deploy:
+#       resources:
+#         reservations:
+#           devices:
+#             - capabilities: [gpu]
+
+#   cloudflared:
+#     image: cloudflare/cloudflared:latest
+#     container_name: cloudflared_tunnel
+#     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+#     depends_on:
+#       - fastapi
+#     restart: unless-stopped
 services:
   fastapi:
     build: .
@@ -20,3 +42,10 @@ services:
     depends_on:
       - fastapi
     restart: unless-stopped
+    environment:
+      - TUNNEL_NO_UPDATE=true
+    volumes:
+      - cloudflared_data:/etc/cloudflared
+
+volumes:
+  cloudflared_data:
