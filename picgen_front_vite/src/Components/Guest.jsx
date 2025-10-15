@@ -31,7 +31,7 @@ const Guest = ({ isGuest = true }) => {
     const data = { prompt, dimensions: 512, inference_steps: 25, guidance_scale:10 };
     try {
       const response = await axios.post(
-        "stablediffserver.duckdns.org/generate-image",
+        "https://huggingface.co/spaces/username/sdserver123/run/predict",
         data
       );
       if (response.data.success) {
