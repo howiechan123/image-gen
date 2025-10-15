@@ -18,7 +18,7 @@ COPY src ./src
 RUN ./mvnw clean package -DskipTests
 
 # Runtime stage
-FROM eclipse-temurin:25-jammy
+FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 

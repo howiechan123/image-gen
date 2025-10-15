@@ -1,23 +1,35 @@
-# ---- Base image (PyTorch + CUDA 12.1 for GPU) ----
-FROM pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime
-
-# For CPU-only systems, use instead:
-# FROM python:3.11-slim
+# Use latest CUDA 12.1 PyTorch runtime
+FROM pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y git ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+# Install required system packages
+RUN apt-get update && apt-get install -y \
+    git \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+ && rm -rf /var/lib/apt/lists/*
 
-# Copy code (only main.py)
+# Copy your app
 COPY main.py .
 
-# Install dependencies
-RUN pip install --upgrade pip
-RUN pip install fastapi uvicorn diffusers transformers accelerate safetensors pillow torch torchvision xformers
+# Upgrade pip and install Python dependencies
+RUN pip install --upgrade pip \
+ && pip install \
+    fastapi \
+    uvicorn[standard] \
+    torch==2.3.0 \
+    torchvision==0.18.0 \
+    transformers==4.47.0 \
+    diffusers==0.35.1 \
+    accelerate \
+    safetensors \
+    pillow \
+    xformers==0.0.26.post1
 
-# Expose port
+# Expose FastAPI port
 EXPOSE 8000
 
-# Run the app
+# Run FastAPI server
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
