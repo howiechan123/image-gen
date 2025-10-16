@@ -33,6 +33,7 @@ public class StableDiffusionService {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .flatMap(postResp -> {
+                    System.out.println("POST response: " + postResp);
                     if (postResp == null || !postResp.containsKey("event_id")) {
                         return Mono.just(ResponseEntity.badRequest().build());
                     }
@@ -45,6 +46,7 @@ public class StableDiffusionService {
 
     private Mono<ResponseEntity<responseHF>> pollForResult(String url) {
         System.out.println("Start poll");
+
         return webClient.get()
                 .uri(url)
                 .retrieve()
