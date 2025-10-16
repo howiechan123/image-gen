@@ -94,7 +94,7 @@ public class StableDiffusionService {
                     return Mono.just(ResponseEntity.ok(new responseHF(image, success, dto)));
                 })
                 .next()
-                .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(2)).take(30))
+                .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(10)).take(60))
                 .switchIfEmpty(Mono.just(ResponseEntity.status(504)
                         .body(new responseHF(null, false, new promptDTO("", 0, 0, 0)))))
                 .onErrorResume(e -> {
