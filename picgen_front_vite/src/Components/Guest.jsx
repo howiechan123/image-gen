@@ -30,7 +30,7 @@ const Guest = ({ isGuest = true }) => {
     openModal();
 
     try {
-      const response = await generateImage(prompt, 512, 25, 10);
+      const response = await generateImage(prompt, 128, 10, 10);
       if (response.data.success) {
         setImage(`data:image/png;base64,${response.data.image}`);
         openModal();
