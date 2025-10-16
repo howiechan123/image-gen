@@ -28,10 +28,11 @@ public class StableDiffusionService {
         );
 
         return webClient.post()
-                .uri(postUrl)
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(Map.class)
+            .uri(postUrl)
+            .header("Accept", "application/json")
+            .header("Content-Type", "application/json")
+            .retrieve()
+            .bodyToMono(Map.class)
                 .flatMap(postResp -> {
                     System.out.println("POST response: " + postResp);
                     if (postResp == null || !postResp.containsKey("event_id")) {
@@ -45,49 +46,44 @@ public class StableDiffusionService {
     }
 
     private Mono<ResponseEntity<responseHF>> pollForResult(String url) {
-        System.out.println("Start poll");
-
         return webClient.get()
                 .uri(url)
                 .retrieve()
                 .bodyToMono(Map.class)
                 .flatMap(resp -> {
-                    System.out.println("start response");
-                    List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
-                    System.out.println("start response 1");
-                    if (dataList == null || dataList.isEmpty()) {
+                    String event = (String) resp.getOrDefault("event", "");
+                    if (!"complete".equals(event)) {
                         return Mono.empty();
                     }
-                    System.out.println("start response 2");
+
+                    List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
+                    if (dataList == null || dataList.isEmpty()) {
+                        return Mono.just(ResponseEntity.status(504)
+                                .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
+                    }
+
                     Map<String, Object> dataItem = dataList.get(0);
-                    System.out.println("start response 3");
                     String image = (String) dataItem.getOrDefault("image", null);
-                    System.out.println("start response 4");
                     boolean success = Boolean.parseBoolean(dataItem.getOrDefault("success", false).toString());
-                    System.out.println("start response 5");
 
                     Map<String, Object> promptMap = (Map<String, Object>) dataItem.getOrDefault("prompt params", Map.of());
-                    System.out.println("start response 6");
                     promptDTO dto = new promptDTO(
                             (String) promptMap.getOrDefault("prompt", ""),
                             ((Number) promptMap.getOrDefault("dimensions", 0)).intValue(),
                             ((Number) promptMap.getOrDefault("inf_steps", 0)).intValue(),
                             ((Number) promptMap.getOrDefault("scale", 0)).intValue()
                     );
-                    System.out.println("start response 7");
 
                     responseHF response = new responseHF(image, success, dto);
-                    System.out.println("Response:" + response);
                     return Mono.just(ResponseEntity.ok(response));
                 })
-                .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(10)).take(60))
+                .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(2)).take(30))
                 .switchIfEmpty(Mono.just(ResponseEntity.status(504)
-                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))))
-                )
+                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0)))))
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest()
-                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))))
-                );
+                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0)))));
     }
+
 
     public record responseHF(String image, boolean success, promptDTO dto) {}
 
