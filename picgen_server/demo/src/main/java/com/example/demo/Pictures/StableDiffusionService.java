@@ -20,12 +20,14 @@ public class StableDiffusionService {
             int inference_steps,
             int guidance_scale
     ) {
-        System.out.println("Start hf call");
-        String postUrl = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict";
-        Map<String, Object> body = Map.of("data", List.of(prompt, dimensions, inference_steps, guidance_scale));
+        System.out.println("Start HF call");
+
+        Map<String, Object> body = Map.of(
+                "data", List.of(prompt, dimensions, inference_steps, guidance_scale)
+        );
 
         return webClient.post()
-                .uri(postUrl)
+                .uri("https://sdserver123-sdserver123.hf.space/gradio_api/call/predict")
                 .header("Content-Type", "application/json")
                 .bodyValue(body)
                 .retrieve()
@@ -36,36 +38,39 @@ public class StableDiffusionService {
                         return Mono.just(ResponseEntity.badRequest().build());
                     }
                     String eventId = postResp.get("event_id").toString();
-                    System.out.println("Start polling after 20s delay");
-                    return pollForResult(eventId);
+                    return pollForResult(eventId, 0);
                 })
                 .onErrorResume(e -> {
                     System.out.println("POST error: " + e.getMessage());
-                    return Mono.just(ResponseEntity.badRequest().build());
+                    return Mono.just(ResponseEntity.status(500).build());
                 });
     }
 
-    private Mono<ResponseEntity<responseHF>> pollForResult(String eventId) {
-        String url = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
-        System.out.println("Polling URL: " + url);
+    private Mono<ResponseEntity<responseHF>> pollForResult(String eventId, int attempt) {
+        if (attempt >= 30) { // max 30 attempts
+            System.out.println("Polling timeout");
+            return Mono.just(ResponseEntity.status(504)
+                    .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
+        }
 
-        return Mono.delay(Duration.ofSeconds(20))
+        String url = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+        System.out.println("Polling attempt " + (attempt + 1) + " URL: " + url);
+
+        return Mono.delay(Duration.ofSeconds(2)) // delay between attempts
                 .flatMap(t -> webClient.get()
                         .uri(url)
-                        .header("Accept", "application/json")
                         .retrieve()
                         .bodyToMono(Map.class)
                         .flatMap(resp -> {
                             System.out.println("GET response: " + resp);
-                            if (resp == null || !resp.containsKey("data")) {
-                                System.out.println("data missing in GET response");
-                                return Mono.just(ResponseEntity.status(504)
-                                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
+                            if (resp == null) return Mono.empty();
+                            String event = (String) resp.getOrDefault("event", "");
+                            if (!"complete".equals(event)) {
+                                return pollForResult(eventId, attempt + 1);
                             }
 
                             List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
-                            if (dataList.isEmpty()) {
-                                System.out.println("data empty in GET response");
+                            if (dataList == null || dataList.isEmpty()) {
                                 return Mono.just(ResponseEntity.status(504)
                                         .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
                             }
@@ -73,7 +78,6 @@ public class StableDiffusionService {
                             Map<String, Object> dataItem = dataList.get(0);
                             String image = (String) dataItem.getOrDefault("image", null);
                             boolean success = Boolean.parseBoolean(dataItem.getOrDefault("success", false).toString());
-                            System.out.println("image retrieved: " + (image != null));
 
                             Map<String, Object> promptMap = (Map<String, Object>) dataItem.getOrDefault("prompt params", Map.of());
                             promptDTO dto = new promptDTO(
@@ -82,13 +86,13 @@ public class StableDiffusionService {
                                     ((Number) promptMap.getOrDefault("inf_steps", 0)).intValue(),
                                     ((Number) promptMap.getOrDefault("scale", 0)).intValue()
                             );
-                            System.out.println("prompt DTO created");
+
                             return Mono.just(ResponseEntity.ok(new responseHF(image, success, dto)));
                         })
+                        .switchIfEmpty(pollForResult(eventId, attempt + 1))
                         .onErrorResume(e -> {
-                            System.out.println("error during poll: " + e.getMessage());
-                            return Mono.just(ResponseEntity.badRequest()
-                                    .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
+                            System.out.println("Polling error: " + e.getMessage());
+                            return pollForResult(eventId, attempt + 1);
                         })
                 );
     }
