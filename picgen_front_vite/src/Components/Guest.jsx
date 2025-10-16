@@ -8,9 +8,6 @@ import { savePicture } from "../api/PictureAPI";
 import { useToken } from "./TokenContext";
 import { generateImage } from "../api/PictureAPI";
 
-
-import { Client } from "@gradio/client";
-
 const Guest = ({ isGuest = true }) => {
   const [prompt, setPrompt] = useState("");
   const [imageModalOpen, setImageModalOpen] = useState(false);
