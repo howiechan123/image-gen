@@ -56,17 +56,21 @@ public class StableDiffusionService {
                 .retrieve()
                 .bodyToFlux(String.class)
                 .flatMap(line -> {
+                    if (!line.startsWith("data:")) return Mono.empty(); // ignore event: lines etc.
+                    String json = line.substring(5).trim();
+                    if (json.isEmpty() || json.equals("[DONE]")) return Mono.empty();
+
                     Map<String, Object> resp;
                     try {
-                        resp = new com.fasterxml.jackson.databind.ObjectMapper().readValue(line, Map.class);
+                        resp = new com.fasterxml.jackson.databind.ObjectMapper().readValue(json, Map.class);
                     } catch (Exception e) {
                         return Mono.empty();
                     }
+
                     String event = (String) resp.getOrDefault("event", "");
                     System.out.println("event: " + event);
-                    if (!"complete".equals(event)) {
-                        return Mono.empty();
-                    }
+                    if (!"complete".equals(event)) return Mono.empty();
+
                     System.out.println("event complete, processing data");
                     List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
                     if (dataList == null || dataList.isEmpty()) {
@@ -78,6 +82,7 @@ public class StableDiffusionService {
                     String image = (String) dataItem.getOrDefault("image", null);
                     boolean success = Boolean.parseBoolean(dataItem.getOrDefault("success", false).toString());
                     System.out.println("image retrieved: " + (image != null));
+
                     Map<String, Object> promptMap = (Map<String, Object>) dataItem.getOrDefault("prompt params", Map.of());
                     promptDTO dto = new promptDTO(
                             (String) promptMap.getOrDefault("prompt", ""),
@@ -98,6 +103,7 @@ public class StableDiffusionService {
                             .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
                 });
     }
+
 
 
     public record responseHF(String image, boolean success, promptDTO dto) {}
