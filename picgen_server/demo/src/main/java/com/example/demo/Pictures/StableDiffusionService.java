@@ -41,56 +41,43 @@ public class StableDiffusionService {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
-    private Mono<ResponseEntity<HFImageData>> pollForResult(String url) {
+    private Mono<ResponseEntity<responseHF>> pollForResult(String url) {
         return webClient.get()
                 .uri(url)
                 .retrieve()
-                .bodyToMono(HFResponseDTO.class)
+                .bodyToMono(Map.class)
                 .flatMap(resp -> {
-                    if (resp == null || resp.data().isEmpty()) {
+                    List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
+                    if (dataList == null || dataList.isEmpty()) {
                         return Mono.empty();
                     }
-                    Map<String, Object> dataMap = resp.data().get(0);
-                    String base64 = (String) dataMap.getOrDefault("image", null);
-                    boolean success = Boolean.parseBoolean(dataMap.getOrDefault("success", false).toString());
 
-                    Map<String, Object> promptMap = (Map<String, Object>) dataMap.getOrDefault("prompt params", Map.of());
-                    PromptDTO promptDTO = new PromptDTO(
+                    Map<String, Object> dataItem = dataList.get(0);
+                    String image = (String) dataItem.getOrDefault("image", null);
+                    boolean success = Boolean.parseBoolean(dataItem.getOrDefault("success", false).toString());
+
+                    Map<String, Object> promptMap = (Map<String, Object>) dataItem.getOrDefault("prompt params", Map.of());
+                    promptDTO dto = new promptDTO(
                             (String) promptMap.getOrDefault("prompt", ""),
                             ((Number) promptMap.getOrDefault("dimensions", 0)).intValue(),
                             ((Number) promptMap.getOrDefault("inf_steps", 0)).intValue(),
                             ((Number) promptMap.getOrDefault("scale", 0)).intValue()
                     );
 
-                    HFImageData hfImageData = new HFImageData(base64, success, promptDTO);
-                    return Mono.just(ResponseEntity.ok(hfImageData));
+                    responseHF response = new responseHF(image, success, dto);
+                    return Mono.just(ResponseEntity.ok(response));
                 })
                 .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(2)).take(30))
-                .switchIfEmpty(Mono.just(
-                        ResponseEntity.status(504)
-                                .body(new HFImageData(null, false, new PromptDTO("", 0, 0, 0)))
-                ))
-                .onErrorResume(e -> Mono.just(
-                        ResponseEntity.badRequest()
-                                .body(new HFImageData(null, false, new PromptDTO("", 0, 0, 0)))
-                ));
+                .switchIfEmpty(Mono.just(ResponseEntity.status(504)
+                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))))
+                )
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest()
+                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))))
+                );
     }
 
+    public record responseHF(String image, boolean success, promptDTO dto) {}
 
-    public record HFResponseDTO(
-            List<Map<String, Object>> data
-    ) {}
-
-    public record HFImageData(
-            String image,
-            boolean success,
-            PromptDTO promptParams
-    ) {}
-
-    public record PromptDTO(
-            String prompt,
-            int dimensions,
-            int inf_steps,
-            int scale
-    ) {}
+    public record promptDTO(String prompt, int dimensions, int inference_steps, int guidance_scale) {}
 }
+
