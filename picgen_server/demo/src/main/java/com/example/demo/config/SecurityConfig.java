@@ -34,6 +34,7 @@ public class SecurityConfig{
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/public/auth/login", "/public/register", "/public/auth/refresh").permitAll()
+                .requestMatchers("/api/Pictures/generate_image").permitAll()
                 .anyRequest().authenticated()
                 // .anyRequest().permitAll()
             )
@@ -51,7 +52,7 @@ public class SecurityConfig{
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("https://howiechan-ai.vercel.app")); // React dev server
+        config.setAllowedOrigins(List.of("https://howiechan-ai.vercel.app")); // frontend, huggingface server
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(List.of("*"));
