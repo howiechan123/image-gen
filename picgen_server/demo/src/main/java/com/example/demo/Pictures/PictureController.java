@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.User.User;
 import com.example.demo.User.UserService;
 import com.example.demo.config.RateLimit;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import reactor.core.publisher.Mono;
 
@@ -77,7 +78,7 @@ public class PictureController {
     @PostMapping("/generate_image")
     @RateLimit(limit = 5, period = 60)
     public Mono<ResponseEntity<?>> generateImage(@RequestBody promptDTO dto){
-        return pictureService.generateImage(dto.prompt(), dto.dimensions(), dto.inference_steps(), dto.guidance_scale());
+        return pictureService.generateImage(dto.prompt(), dto.dimensions(), dto.inferenceSteps(), dto.guidanceScale());
     }
 
     public record pictureRequestDTO(String fileName, String filePath) {
@@ -88,7 +89,7 @@ public class PictureController {
 
     }
 
-    public record promptDTO(String prompt, int dimensions, int inference_steps, int guidance_scale){
+    public record promptDTO(String prompt, int dimensions, @JsonProperty("inference_steps") int inferenceSteps, @JsonProperty("guidance_scale") int guidanceScale){
 
     }
 

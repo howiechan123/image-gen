@@ -46,26 +46,36 @@ public class StableDiffusionService {
                 .uri(url)
                 .retrieve()
                 .bodyToMono(HFResponseDTO.class)
-                .map(resp -> {
+                .flatMap(resp -> {
+                    if (resp == null || resp.data().isEmpty()) {
+                        return Mono.empty();
+                    }
                     Map<String, Object> dataMap = resp.data().get(0);
-                    String base64 = dataMap.get("image").toString();
-                    boolean success = Boolean.parseBoolean(dataMap.get("success").toString());
-                    Map<String, Object> promptMap = (Map<String, Object>) dataMap.get("prompt params");
+                    String base64 = (String) dataMap.getOrDefault("image", null);
+                    boolean success = Boolean.parseBoolean(dataMap.getOrDefault("success", false).toString());
+
+                    Map<String, Object> promptMap = (Map<String, Object>) dataMap.getOrDefault("prompt params", Map.of());
                     PromptDTO promptDTO = new PromptDTO(
-                            promptMap.get("prompt").toString(),
-                            ((Number) promptMap.get("dimensions")).intValue(),
-                            ((Number) promptMap.get("inf_steps")).intValue(),
-                            ((Number) promptMap.get("scale")).intValue()
+                            (String) promptMap.getOrDefault("prompt", ""),
+                            ((Number) promptMap.getOrDefault("dimensions", 0)).intValue(),
+                            ((Number) promptMap.getOrDefault("inf_steps", 0)).intValue(),
+                            ((Number) promptMap.getOrDefault("scale", 0)).intValue()
                     );
+
                     HFImageData hfImageData = new HFImageData(base64, success, promptDTO);
-                    return ResponseEntity.ok(hfImageData);
+                    return Mono.just(ResponseEntity.ok(hfImageData));
                 })
                 .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(2)).take(30))
                 .switchIfEmpty(Mono.just(
                         ResponseEntity.status(504)
                                 .body(new HFImageData(null, false, new PromptDTO("", 0, 0, 0)))
+                ))
+                .onErrorResume(e -> Mono.just(
+                        ResponseEntity.badRequest()
+                                .body(new HFImageData(null, false, new PromptDTO("", 0, 0, 0)))
                 ));
     }
+
 
     public record HFResponseDTO(
             List<Map<String, Object>> data
