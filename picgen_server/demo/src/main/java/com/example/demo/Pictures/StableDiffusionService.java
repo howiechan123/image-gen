@@ -20,6 +20,8 @@ public class StableDiffusionService {
             int inference_steps,
             int guidance_scale
     ) {
+
+        System.out.println("Start hf call");
         String postUrl = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict";
         Map<String, Object> body = Map.of(
                 "data", List.of(prompt, dimensions, inference_steps, guidance_scale)
@@ -42,6 +44,7 @@ public class StableDiffusionService {
     }
 
     private Mono<ResponseEntity<responseHF>> pollForResult(String url) {
+        System.out.println("Start poll");
         return webClient.get()
                 .uri(url)
                 .retrieve()
@@ -65,9 +68,10 @@ public class StableDiffusionService {
                     );
 
                     responseHF response = new responseHF(image, success, dto);
+                    System.out.println("Response:" + response);
                     return Mono.just(ResponseEntity.ok(response));
                 })
-                .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(2)).take(30))
+                .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(10)).take(60))
                 .switchIfEmpty(Mono.just(ResponseEntity.status(504)
                         .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))))
                 )
