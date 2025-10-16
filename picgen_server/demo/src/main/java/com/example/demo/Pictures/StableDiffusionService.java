@@ -46,25 +46,28 @@ public class StableDiffusionService {
     }
 
     private Mono<ResponseEntity<responseHF>> pollForResult(String url) {
+        System.out.println("Start polling");
         return webClient.get()
                 .uri(url)
                 .retrieve()
                 .bodyToMono(Map.class)
                 .flatMap(resp -> {
                     String event = (String) resp.getOrDefault("event", "");
+                    System.out.println("here 1");
                     if (!"complete".equals(event)) {
                         return Mono.empty();
                     }
-
+                    System.out.println("here 2");
                     List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
                     if (dataList == null || dataList.isEmpty()) {
                         return Mono.just(ResponseEntity.status(504)
                                 .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
                     }
-
+                    System.out.println("here 3");
                     Map<String, Object> dataItem = dataList.get(0);
                     String image = (String) dataItem.getOrDefault("image", null);
                     boolean success = Boolean.parseBoolean(dataItem.getOrDefault("success", false).toString());
+                    System.out.println("here 4");
 
                     Map<String, Object> promptMap = (Map<String, Object>) dataItem.getOrDefault("prompt params", Map.of());
                     promptDTO dto = new promptDTO(
@@ -73,7 +76,7 @@ public class StableDiffusionService {
                             ((Number) promptMap.getOrDefault("inf_steps", 0)).intValue(),
                             ((Number) promptMap.getOrDefault("scale", 0)).intValue()
                     );
-
+                    System.out.println("here 5");
                     responseHF response = new responseHF(image, success, dto);
                     return Mono.just(ResponseEntity.ok(response));
                 })
