@@ -20,6 +20,8 @@ import com.example.demo.User.User;
 import com.example.demo.User.UserService;
 import com.example.demo.config.RateLimit;
 
+import reactor.core.publisher.Mono;
+
 @RestController
 @RequestMapping(path="api/Pictures")
 public class PictureController {
@@ -74,7 +76,7 @@ public class PictureController {
 
     @PostMapping("/generate_image")
     @RateLimit(limit = 5, period = 60)
-    public ResponseEntity<?> generateImage(@RequestBody promptDTO dto){
+    public Mono<ResponseEntity<?>> generateImage(@RequestBody promptDTO dto){
         return pictureService.generateImage(dto.prompt(), dto.dimensions(), dto.inference_steps(), dto.guidance_scale());
     }
 

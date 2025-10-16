@@ -45,54 +45,66 @@
 //     }
 //     public record promptDTO(String prompt, int dimensions, int inference_steps, int guidance_scale) {}
 // }
-
-
 package com.example.demo.Pictures;
 
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import java.util.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class StableDiffusionService {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final WebClient webClient = WebClient.builder().build();
 
-    public ResponseEntity<?> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale) {
-        try {
-            // Step 1: POST request to initiate the generation
-            String postUrl = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict";
+    public Mono<ResponseEntity<?>> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale) {
 
-            Map<String, Object> body = Map.of(
-                    "data", List.of(prompt, dimensions, inference_steps, guidance_scale)
-            );
+        String postUrl = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict";
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        Map<String, Object> body = Map.of(
+                "data", List.of(prompt, dimensions, inference_steps, guidance_scale)
+        );
 
-            ResponseEntity<Map> postResponse = restTemplate.postForEntity(postUrl, entity, Map.class);
+        // Step 1: POST request to get event_id
+        return webClient.post()
+                .uri(postUrl)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .flatMap(postResp -> {
+                    if (postResp == null || !postResp.containsKey("event_id")) {
+                        return Mono.just(ResponseEntity.badRequest().body("No event_id returned"));
+                    }
 
-            if (postResponse.getStatusCode() != HttpStatus.OK || postResponse.getBody() == null) {
-                return ResponseEntity.status(400).body("Failed to start generation");
-            }
+                    String eventId = postResp.get("event_id").toString();
+                    String getUrl = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
 
-            // Step 2: Extract event_id
-            Object eventId = postResponse.getBody().get("event_id");
-            if (eventId == null) {
-                return ResponseEntity.status(400).body("No event_id returned");
-            }
-
-            // Step 3: Poll the GET endpoint for the result
-            String getUrl = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
-            ResponseEntity<Map> getResponse = restTemplate.getForEntity(getUrl, Map.class);
-
-            return ResponseEntity.ok(getResponse.getBody());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(400).body("Invalid request: " + e.getMessage());
-        }
+                    // Step 2: Poll GET endpoint
+                    return pollForResult(getUrl);
+                })
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Invalid request: " + e.getMessage())));
     }
+
+    private Mono<ResponseEntity<Map>> pollForResult(String url) {
+        return webClient.get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .repeatWhenEmpty(repeat -> repeat
+                        .delayElements(Duration.ofSeconds(10))
+                        .take(60)
+                )
+                .map(resp -> ResponseEntity.ok(resp))
+                .switchIfEmpty(Mono.just(
+                        ResponseEntity.status(504)
+                                .body(Map.of("error", "Timed out waiting for result"))
+                ));
+    }
+
+
 }

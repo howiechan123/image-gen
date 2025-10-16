@@ -10,6 +10,7 @@ import com.example.demo.Pictures.PictureController.pictureRequestDTO;
 import com.example.demo.User.User;
 
 import jakarta.transaction.Transactional;
+import reactor.core.publisher.Mono;
 
 @Service
 public class PictureService {
@@ -70,7 +71,7 @@ public class PictureService {
         System.out.println("file name changed");
     }
 
-    public ResponseEntity<?> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale){
+    public Mono<ResponseEntity<?>> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale){
         return stableDiffusionService.generateImage(prompt, dimensions, inference_steps, guidance_scale);
     }
 
