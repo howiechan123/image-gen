@@ -50,22 +50,29 @@ public class StableDiffusionService {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .flatMap(resp -> {
+                    System.out.println("start response");
                     List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
+                    System.out.println("start response 1");
                     if (dataList == null || dataList.isEmpty()) {
                         return Mono.empty();
                     }
-
+                    System.out.println("start response 2");
                     Map<String, Object> dataItem = dataList.get(0);
+                    System.out.println("start response 3");
                     String image = (String) dataItem.getOrDefault("image", null);
+                    System.out.println("start response 4");
                     boolean success = Boolean.parseBoolean(dataItem.getOrDefault("success", false).toString());
+                    System.out.println("start response 5");
 
                     Map<String, Object> promptMap = (Map<String, Object>) dataItem.getOrDefault("prompt params", Map.of());
+                    System.out.println("start response 6");
                     promptDTO dto = new promptDTO(
                             (String) promptMap.getOrDefault("prompt", ""),
                             ((Number) promptMap.getOrDefault("dimensions", 0)).intValue(),
                             ((Number) promptMap.getOrDefault("inf_steps", 0)).intValue(),
                             ((Number) promptMap.getOrDefault("scale", 0)).intValue()
                     );
+                    System.out.println("start response 7");
 
                     responseHF response = new responseHF(image, success, dto);
                     System.out.println("Response:" + response);
