@@ -30,18 +30,22 @@ public class StableDiffusionService {
         return webClient.post()
             .uri(postUrl)
             .header("Content-Type", "application/json")
+            .bodyValue(body)
             .retrieve()
             .bodyToMono(Map.class)
-                .flatMap(postResp -> {
-                    System.out.println("POST response: " + postResp);
-                    if (postResp == null || !postResp.containsKey("event_id")) {
-                        return Mono.just(ResponseEntity.badRequest().build());
-                    }
-                    String eventId = postResp.get("event_id").toString();
-                    String getUrl = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
-                    return pollForResult(getUrl);
-                })
-                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
+            .flatMap(postResp -> {
+                System.out.println("POST response: " + postResp);
+                if (postResp == null || !postResp.containsKey("event_id")) {
+                    return Mono.just(ResponseEntity.badRequest().build());
+                }
+                String eventId = postResp.get("event_id").toString();
+                String getUrl = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+                return pollForResult(getUrl);
+            })
+            .onErrorResume(e -> {
+                System.out.println("POST error: " + e.getMessage());
+                return Mono.just(ResponseEntity.badRequest().build());
+            });
     }
 
     private Mono<ResponseEntity<responseHF>> pollForResult(String url) {
@@ -94,9 +98,6 @@ public class StableDiffusionService {
                 });
     }
 
-
     public record responseHF(String image, boolean success, promptDTO dto) {}
-
     public record promptDTO(String prompt, int dimensions, int inference_steps, int guidance_scale) {}
 }
-
