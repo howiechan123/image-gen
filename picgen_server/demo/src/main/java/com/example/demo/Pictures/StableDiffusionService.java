@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class StableDiffusionService {
-    @Value("${SDServer.url}")
+    @Value("${sd.server.url}")
     private String serverURL;
 
     private final RestTemplate restTemplate = new RestTemplate();
