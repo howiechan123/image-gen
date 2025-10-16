@@ -52,6 +52,7 @@ public class StableDiffusionService {
         System.out.println("Start polling");
         return webClient.get()
                 .uri(url)
+                .header("Accept", "text/event-stream")
                 .retrieve()
                 .bodyToFlux(String.class)
                 .flatMap(line -> {
@@ -97,6 +98,7 @@ public class StableDiffusionService {
                             .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
                 });
     }
+
 
     public record responseHF(String image, boolean success, promptDTO dto) {}
     public record promptDTO(String prompt, int dimensions, int inference_steps, int guidance_scale) {}
