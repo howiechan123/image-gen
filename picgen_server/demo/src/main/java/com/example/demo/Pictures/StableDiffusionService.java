@@ -46,56 +46,59 @@ public class StableDiffusionService {
                 });
     }
 
-    private Mono<ResponseEntity<responseHF>> pollForResult(String eventId, int attempt) {
-        if (attempt >= 30) { // max 30 attempts
-            System.out.println("Polling timeout");
-            return Mono.just(ResponseEntity.status(504)
-                    .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
-        }
-
-        String url = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
-        System.out.println("Polling attempt " + (attempt + 1) + " URL: " + url);
-
-        return Mono.delay(Duration.ofSeconds(2)) // delay between attempts
-                .flatMap(t -> webClient.get()
-                        .uri(url)
-                        .retrieve()
-                        .bodyToMono(Map.class)
-                        .flatMap(resp -> {
-                            System.out.println("GET response: " + resp);
-                            if (resp == null) return Mono.empty();
-                            String event = (String) resp.getOrDefault("event", "");
-                            if (!"complete".equals(event)) {
-                                return pollForResult(eventId, attempt + 1);
-                            }
-
-                            List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
-                            if (dataList == null || dataList.isEmpty()) {
-                                return Mono.just(ResponseEntity.status(504)
-                                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
-                            }
-
-                            Map<String, Object> dataItem = dataList.get(0);
-                            String image = (String) dataItem.getOrDefault("image", null);
-                            boolean success = Boolean.parseBoolean(dataItem.getOrDefault("success", false).toString());
-
-                            Map<String, Object> promptMap = (Map<String, Object>) dataItem.getOrDefault("prompt params", Map.of());
-                            promptDTO dto = new promptDTO(
-                                    (String) promptMap.getOrDefault("prompt", ""),
-                                    ((Number) promptMap.getOrDefault("dimensions", 0)).intValue(),
-                                    ((Number) promptMap.getOrDefault("inf_steps", 0)).intValue(),
-                                    ((Number) promptMap.getOrDefault("scale", 0)).intValue()
-                            );
-
-                            return Mono.just(ResponseEntity.ok(new responseHF(image, success, dto)));
-                        })
-                        .switchIfEmpty(pollForResult(eventId, attempt + 1))
-                        .onErrorResume(e -> {
-                            System.out.println("Polling error: " + e.getMessage());
-                            return pollForResult(eventId, attempt + 1);
-                        })
-                );
+private Mono<ResponseEntity<responseHF>> pollForResult(String eventId, int attempt) {
+    if (attempt > 20) { // max 20 tries
+        return Mono.just(ResponseEntity.status(504)
+                .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
     }
+
+    String url = "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+    System.out.println("Polling attempt " + attempt + " URL: " + url);
+
+    return Mono.delay(Duration.ofSeconds(20)) // 20s delay between polls
+            .flatMap(t -> webClient.get()
+                    .uri(url)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+            )
+            .flatMap(resp -> {
+                if (resp == null) return pollForResult(eventId, attempt + 1);
+
+                String event = (String) resp.getOrDefault("event", "");
+                System.out.println("event: " + event);
+
+                if ("complete".equals(event)) {
+                    List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
+                    if (dataList == null || dataList.isEmpty()) {
+                        return Mono.just(ResponseEntity.status(504)
+                                .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
+                    }
+
+                    Map<String, Object> dataItem = dataList.get(0);
+                    String image = (String) dataItem.getOrDefault("image", null);
+                    boolean success = Boolean.parseBoolean(dataItem.getOrDefault("success", false).toString());
+                    Map<String, Object> promptMap = (Map<String, Object>) dataItem.getOrDefault("prompt params", Map.of());
+
+                    promptDTO dto = new promptDTO(
+                            (String) promptMap.getOrDefault("prompt", ""),
+                            ((Number) promptMap.getOrDefault("dimensions", 0)).intValue(),
+                            ((Number) promptMap.getOrDefault("inf_steps", 0)).intValue(),
+                            ((Number) promptMap.getOrDefault("scale", 0)).intValue()
+                    );
+
+                    System.out.println("image retrieved: " + (image != null));
+                    return Mono.just(ResponseEntity.ok(new responseHF(image, success, dto)));
+                } else {
+                    return pollForResult(eventId, attempt + 1);
+                }
+            })
+            .onErrorResume(e -> {
+                System.out.println("Polling error: " + e.getMessage());
+                return Mono.just(ResponseEntity.status(500)
+                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
+            });
+}
+
 
     public record responseHF(String image, boolean success, promptDTO dto) {}
     public record promptDTO(String prompt, int dimensions, int inference_steps, int guidance_scale) {}
