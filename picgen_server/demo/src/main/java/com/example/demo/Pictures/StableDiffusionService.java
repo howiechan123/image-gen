@@ -48,25 +48,30 @@ public class StableDiffusionService {
         return webClient.get()
                 .uri(url)
                 .retrieve()
-                .bodyToMono(Map.class)
-                .flatMap(resp -> {
+                .bodyToFlux(String.class)
+                .flatMap(line -> {
+                    Map<String, Object> resp;
+                    try {
+                        resp = new com.fasterxml.jackson.databind.ObjectMapper().readValue(line, Map.class);
+                    } catch (Exception e) {
+                        return Mono.empty();
+                    }
                     String event = (String) resp.getOrDefault("event", "");
-                    System.out.println("here 1");
+                    System.out.println("event: " + event);
                     if (!"complete".equals(event)) {
                         return Mono.empty();
                     }
-                    System.out.println("here 2");
+                    System.out.println("event complete, processing data");
                     List<Map<String, Object>> dataList = (List<Map<String, Object>>) resp.get("data");
                     if (dataList == null || dataList.isEmpty()) {
+                        System.out.println("data empty");
                         return Mono.just(ResponseEntity.status(504)
                                 .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
                     }
-                    System.out.println("here 3");
                     Map<String, Object> dataItem = dataList.get(0);
                     String image = (String) dataItem.getOrDefault("image", null);
                     boolean success = Boolean.parseBoolean(dataItem.getOrDefault("success", false).toString());
-                    System.out.println("here 4");
-
+                    System.out.println("image retrieved: " + (image != null));
                     Map<String, Object> promptMap = (Map<String, Object>) dataItem.getOrDefault("prompt params", Map.of());
                     promptDTO dto = new promptDTO(
                             (String) promptMap.getOrDefault("prompt", ""),
@@ -74,15 +79,18 @@ public class StableDiffusionService {
                             ((Number) promptMap.getOrDefault("inf_steps", 0)).intValue(),
                             ((Number) promptMap.getOrDefault("scale", 0)).intValue()
                     );
-                    System.out.println("here 5");
-                    responseHF response = new responseHF(image, success, dto);
-                    return Mono.just(ResponseEntity.ok(response));
+                    System.out.println("prompt DTO created");
+                    return Mono.just(ResponseEntity.ok(new responseHF(image, success, dto)));
                 })
+                .next()
                 .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(2)).take(30))
                 .switchIfEmpty(Mono.just(ResponseEntity.status(504)
                         .body(new responseHF(null, false, new promptDTO("", 0, 0, 0)))))
-                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest()
-                        .body(new responseHF(null, false, new promptDTO("", 0, 0, 0)))));
+                .onErrorResume(e -> {
+                    System.out.println("error during poll: " + e.getMessage());
+                    return Mono.just(ResponseEntity.badRequest()
+                            .body(new responseHF(null, false, new promptDTO("", 0, 0, 0))));
+                });
     }
 
 
