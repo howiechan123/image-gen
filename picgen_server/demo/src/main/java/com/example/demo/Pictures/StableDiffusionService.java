@@ -29,6 +29,7 @@ public class StableDiffusionService {
 
         return webClient.post()
             .uri(postUrl)
+            .header("Content-Type", "application/json")
             .retrieve()
             .bodyToMono(Map.class)
                 .flatMap(postResp -> {
