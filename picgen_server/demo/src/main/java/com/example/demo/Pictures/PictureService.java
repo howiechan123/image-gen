@@ -16,11 +16,13 @@ public class PictureService {
     
     private final PictureRepository pictureRepository;
     private final ImgBBService imgbbService;
+    private final StableDiffusionService stableDiffusionService;
 
     @Autowired
-    public PictureService(PictureRepository pictureRepository, ImgBBService imgbbService) {
+    public PictureService(PictureRepository pictureRepository, ImgBBService imgbbService, StableDiffusionService stableDiffusionService) {
         this.pictureRepository = pictureRepository;
         this.imgbbService = imgbbService;
+        this.stableDiffusionService = stableDiffusionService;
     }
 
     public ResponseEntity<?> getPicturesById(Long userId){
@@ -68,9 +70,9 @@ public class PictureService {
         System.out.println("file name changed");
     }
 
-    // public void downLoadPicture(Long pictureId, String filename) {
-
-    // }
+    public ResponseEntity<?> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale){
+        return stableDiffusionService.generateImage(prompt, dimensions, inference_steps, guidance_scale);
+    }
 
     public record pictureResponse(pictureDTO dto, String message, boolean success) {
 

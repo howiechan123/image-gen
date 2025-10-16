@@ -44,3 +44,13 @@ export const editPictureName = async(picId, newName) => {
     }
 }
 
+export const generateImage = async(prompt, dimensions, inference_steps, guidance_scale) => {
+    try{
+        const response = await SpringAPI.post("api/Pictures/generateImage", {prompt, dimensions, inference_steps, guidance_scale});
+        return response;
+    }
+    catch(err){
+        throw new Error(err);
+    }
+}
+

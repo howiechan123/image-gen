@@ -7,6 +7,9 @@ import Header from "./Header";
 import { savePicture } from "../api/PictureAPI";
 import { useToken } from "./TokenContext";
 
+
+import { Client } from "@gradio/client";
+
 const Guest = ({ isGuest = true }) => {
   const [prompt, setPrompt] = useState("");
   const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -23,26 +26,40 @@ const Guest = ({ isGuest = true }) => {
     setGenerating(false);
   };
 
+
+
+
+
+
   const handleGenerate = async () => {
-    if (!prompt) return window.alert("Please enter a prompt");
-    setGenerating(true);
-    openModal();
+    // if (!prompt) return window.alert("Please enter a prompt");
+    // setGenerating(true);
+    // openModal();
 
-    const data = { prompt, dimensions: 512, inference_steps: 25, guidance_scale:10 };
-    try {
-      const response = await axios.post(
-        "https://huggingface.co/spaces/username/sdserver123/run/predict",
-        data
-      );
-      if (response.data.success) {
-        setImage(`data:image/png;base64,${response.data.image}`);
-        openModal();
-      }
-    } catch (error) {
-      window.alert(error);
-    }
+    // const data = { prompt, dimensions: 512, inference_steps: 25, guidance_scale:10 };
+    // try {
+    //   const response = await axios.post(
+    //     "https://huggingface.co/spaces/username/sdserver123/run/predict",
+    //     data
+    //   );
+    //   if (response.data.success) {
+    //     setImage(`data:image/png;base64,${response.data.image}`);
+    //     openModal();
+    //   }
+    // } catch (error) {
+    //   window.alert(error);
+    // }
 
-    setGenerating(false);
+    // setGenerating(false);
+    const client = await Client.connect("sdserver123/sdserver123");
+    const result = await client.predict("/predict", { 		
+        prompt: "Hello!!", 		
+        dimensions: 3, 		
+        inference_steps: 3, 		
+        guidance_scale: 3, 
+    });
+
+    console.log(result.data);
   };
 
   const stripBase64Prefix = (base64) => {

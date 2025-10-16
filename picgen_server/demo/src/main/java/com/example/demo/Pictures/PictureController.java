@@ -53,7 +53,6 @@ public class PictureController {
     @PostMapping(path="/save")
     @RateLimit(limit = 50, period = 60)
     public ResponseEntity<?> savePicture(@RequestBody pictureRequestDTO dto) {
-        System.out.println("XXXXXXXXXXXXXXXX");
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = Long.valueOf(userDetails.getUsername());
         User user = new User(userId);
@@ -73,16 +72,21 @@ public class PictureController {
         pictureService.changePictureName(pictureId, dto.newName);
     }
 
-    // @GetMapping(path ="{pictureId}")
-    // public void downloadPicture(@PathVariable("pictureId") Long pictureId) {
-
-    // }
+    @PostMapping("/generate_image")
+    @RateLimit(limit = 5, period = 60)
+    public ResponseEntity<?> generateImage(@RequestBody promptDTO dto){
+        return pictureService.generateImage(dto.prompt(), dto.dimensions(), dto.inference_steps(), dto.guidance_scale());
+    }
 
     public record pictureRequestDTO(String fileName, String filePath) {
 
     }
 
     public record changeNameDTO(String newName){
+
+    }
+
+    public record promptDTO(String prompt, int dimensions, int inference_steps, int guidance_scale){
 
     }
 
