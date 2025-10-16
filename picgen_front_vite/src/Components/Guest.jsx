@@ -27,11 +27,6 @@ const Guest = ({ isGuest = true }) => {
     setGenerating(false);
   };
 
-
-
-
-
-
   const handleGenerate = async () => {
     if (!prompt) return window.alert("Please enter a prompt");
     setGenerating(true);
