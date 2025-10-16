@@ -41,37 +41,46 @@ public class StableDiffusionService {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
-    private Mono<ResponseEntity<HFImageResponse>> pollForResult(String url) {
+    private Mono<ResponseEntity<HFImageData>> pollForResult(String url) {
         return webClient.get()
                 .uri(url)
                 .retrieve()
-                .bodyToMono(HFImageResponse.class)
-                .repeatWhenEmpty(repeat -> repeat
-                        .delayElements(Duration.ofSeconds(2))
-                        .take(30)
-                )
-                .map(resp -> ResponseEntity.ok(resp))
+                .bodyToMono(HFResponseDTO.class)
+                .map(resp -> {
+                    Map<String, Object> dataMap = resp.data().get(0);
+                    String base64 = dataMap.get("image").toString();
+                    boolean success = Boolean.parseBoolean(dataMap.get("success").toString());
+                    Map<String, Object> promptMap = (Map<String, Object>) dataMap.get("prompt params");
+                    PromptDTO promptDTO = new PromptDTO(
+                            promptMap.get("prompt").toString(),
+                            ((Number) promptMap.get("dimensions")).intValue(),
+                            ((Number) promptMap.get("inf_steps")).intValue(),
+                            ((Number) promptMap.get("scale")).intValue()
+                    );
+                    HFImageData hfImageData = new HFImageData(base64, success, promptDTO);
+                    return ResponseEntity.ok(hfImageData);
+                })
+                .repeatWhenEmpty(r -> r.delayElements(Duration.ofSeconds(2)).take(30))
                 .switchIfEmpty(Mono.just(
                         ResponseEntity.status(504)
-                                .body(new HFImageResponse(
-                                        null,
-                                        false,
-                                        new PromptDTO("", 0, 0, 0)
-                                ))
+                                .body(new HFImageData(null, false, new PromptDTO("", 0, 0, 0)))
                 ));
     }
 
-    public record HFImageResponse(
+    public record HFResponseDTO(
+            List<Map<String, Object>> data
+    ) {}
+
+    public record HFImageData(
             String image,
             boolean success,
             PromptDTO promptParams
-    ) { }
+    ) {}
 
     public record PromptDTO(
             String prompt,
             int dimensions,
             int inf_steps,
             int scale
-    ) { }
-
+    ) {}
 }
