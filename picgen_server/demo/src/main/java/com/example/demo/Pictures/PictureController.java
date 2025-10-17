@@ -77,13 +77,13 @@ public class PictureController {
 
     @PostMapping("/generate_image")
     @RateLimit(limit = 5, period = 60)
-    public Mono<ResponseEntity<?>> generateImage(@RequestBody promptDTO dto){
+    public ResponseEntity<?> generateImage(@RequestBody promptDTO dto){
         return pictureService.generateImage(dto.prompt(), dto.dimensions(), dto.inferenceSteps(), dto.guidanceScale());
     }
 
     @PostMapping("/pollHF")
     @RateLimit(limit = 10, period = 60)
-    public CompletableFuture<ResponseEntity<?>> poll(@RequestBody eventDTO dto) {
+    public ResponseEntity<?> poll(@RequestBody eventDTO dto) {
         String eventId = dto.event_id();
         return pictureService.pollHF(eventId);
     }

@@ -30,26 +30,27 @@ const Guest = ({ isGuest = true }) => {
     openModal();
 
     try {
-      
+      // Start HF generation
       const postResp = await generateImage(prompt, 512, 20, 10);
-      const eventId = postResp.data.event_id;
+      const eventId = postResp.data?.event_id;
       if (!eventId) throw new Error("No event_id returned from server");
 
-      const pollInterval = 10000; 
+      const pollInterval = 10000; // 10 seconds
       const maxAttempts = 60;
       let attempts = 0;
 
-      
       const poll = async () => {
         try {
           console.log("Polling event:", eventId, "Attempt:", attempts);
           const pollResp = await pollHF(eventId);
 
           if (pollResp.data?.success && pollResp.data?.image) {
+            // Image ready
             setImage(`data:image/png;base64,${pollResp.data.image}`);
             setGenerating(false);
             openModal();
           } else if (attempts < maxAttempts) {
+            // Still processing, schedule next poll
             attempts++;
             setTimeout(poll, pollInterval);
           } else {
@@ -68,6 +69,7 @@ const Guest = ({ isGuest = true }) => {
         }
       };
 
+      // Start polling
       poll();
     } catch (error) {
       console.error("Generate error:", error);
@@ -75,6 +77,7 @@ const Guest = ({ isGuest = true }) => {
       setGenerating(false);
     }
   };
+
 
 
 

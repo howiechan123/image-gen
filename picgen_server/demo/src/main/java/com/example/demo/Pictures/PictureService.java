@@ -72,11 +72,11 @@ public class PictureService {
         System.out.println("file name changed");
     }
 
-    public Mono<ResponseEntity<?>> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale){
+    public ResponseEntity<?> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale){
         return stableDiffusionService.generateImage(prompt, dimensions, inference_steps, guidance_scale);
     }
 
-    public CompletableFuture<ResponseEntity<?>> pollHF(String eventId){
+    public ResponseEntity<?> pollHF(String eventId){
         return stableDiffusionService.pollHF(eventId);
     }
 
