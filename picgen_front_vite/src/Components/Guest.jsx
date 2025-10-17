@@ -25,35 +25,42 @@ const Guest = ({ isGuest = true }) => {
   };
 
   const handleGenerate = async () => {
-    if (!prompt) return window.alert("Please enter a prompt");
-    setGenerating(true);
-    openModal();
+  if (!prompt) return window.alert("Please enter a prompt");
+  setGenerating(true);
+  openModal();
 
-    try {
-      const postResp = await generateImage(prompt, 512, 20, 10);
-      const eventId = postResp.data.event_id;
-      if (!eventId) throw new Error("No event_id returned from server");
+  try {
+    const postResp = await generateImage(prompt, 512, 20, 10);
+    const eventId = postResp.data.event_id;
+    if (!eventId) throw new Error("No event_id returned from server");
 
-      let finished = false;
-      let pollResp = null;
+    const pollInterval = 10000; // 10s
 
-      while (!finished) {
+    const poll = async () => {
+      try {
         console.log("poll");
-        pollResp = await pollHF(eventId);
+        const pollResp = await pollHF(eventId);
         if (pollResp.data?.success && pollResp.data?.image) {
-          finished = true;
           setImage(`data:image/png;base64,${pollResp.data.image}`);
+          setGenerating(false);
+          openModal();
         } else {
-          await new Promise((res) => setTimeout(res, 10000)); // 10s
+          setTimeout(poll, pollInterval);
         }
+      } catch (error) {
+        console.error("Polling error:", error);
+        setTimeout(poll, pollInterval);
       }
+    };
 
-    } catch (error) {
-      window.alert(error);
-    }
+    poll();
 
+  } catch (error) {
+    window.alert(error);
     setGenerating(false);
-  };
+  }
+};
+
 
 
   const stripBase64Prefix = (base64) => {
