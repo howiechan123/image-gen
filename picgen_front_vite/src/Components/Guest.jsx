@@ -87,14 +87,16 @@ const Guest = ({ isGuest = true }) => {
     <div className="min-h-screen bg-gray-950 text-white px-4 py-8">
       <Header isGuest={isGuest} />
 
-      <ImageModal
-        isOpen={imageModalOpen}
-        onClose={closeModal}
-        image={image}
-        isGuest={isGuest}
-        generating={generating}
-        savePic={savePic}
-      />
+    <ImageModal
+      isOpen={imageModalOpen}
+      onClose={() => {
+        if (!generating && !loading) closeModal();
+      }}
+      image={image}
+      isGuest={isGuest}
+      generating={generating}
+      savePic={savePic}
+    />
 
       <div className="max-w-xl mx-auto mt-10 space-y-8">
         <div className="w-full max-w-lg bg-gray-900/80 backdrop-blur-md rounded-2xl shadow-2xl p-8 space-y-6">
