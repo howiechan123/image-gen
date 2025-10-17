@@ -58,7 +58,9 @@ public class StableDiffusionService {
     public ResponseEntity<?> pollHF(String eventId) {
         try {
             System.out.println("Poll call: eventId=" + eventId);
-            String getCmd = "curl -s --max-time 10 https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+            String getCmd = "curl -s -H 'Content-Type: application/json' " +
+                "-H 'User-Agent: PostmanRuntime/7.32.3' " +
+                "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
             pb.redirectErrorStream(true);
             Process p = pb.start();
