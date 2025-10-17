@@ -2,9 +2,12 @@ package com.example.demo.Pictures;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Mono;
@@ -45,33 +48,40 @@ public class StableDiffusionService {
         });
     }
 
-    public Mono<ResponseEntity<?>> pollHF(String eventId) {
-        System.out.println("POll call");
-        return Mono.fromCallable(() -> {
-            String getCmd = "curl -s https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
-            ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
-            pb.redirectErrorStream(true);
-            Process p = pb.start();
+    @Async
+    public CompletableFuture<ResponseEntity<?>> pollHF(String eventId) {
+        System.out.println("Poll call");
 
-            String getOutput;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                getOutput = reader.lines().collect(Collectors.joining("\n"));
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String getCmd = "curl -s https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+                ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
+                pb.redirectErrorStream(true);
+                Process p = pb.start();
+
+                String getOutput;
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                    getOutput = reader.lines().collect(Collectors.joining("\n"));
+                }
+                p.waitFor();
+                p.destroy();
+
+                System.out.println("HF poll raw output: " + getOutput);
+
+                if (!getOutput.contains("\"data\"")) {
+                    return ResponseEntity.ok(Map.of("success", false, "message", "Still processing"));
+                }
+
+                if (getOutput.contains("base64")) {
+                    String base64 = getOutput.replaceAll("(?s).*\"data\":\\[\"(.*?)\".*", "$1").trim();
+                    return ResponseEntity.ok(Map.of("success", true, "image", base64));
+                }
+
+                return ResponseEntity.ok(Map.of("success", false, "message", "Not ready yet"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
             }
-            p.waitFor();
-            p.destroy();
-
-            System.out.println("HF poll raw output: " + getOutput);
-
-            if (!getOutput.contains("\"data\"")) {
-                return ResponseEntity.ok("{\"success\":false,\"message\":\"Still processing\"}");
-            }
-
-            if (getOutput.contains("base64")) {
-                String base64 = getOutput.replaceAll("(?s).*\"data\":\\[\"(.*?)\".*", "$1").trim();
-                return ResponseEntity.ok("{\"success\":true,\"image\":\"" + base64 + "\"}");
-            }
-
-            return ResponseEntity.ok("{\"success\":false,\"message\":\"Not ready yet\"}");
         });
     }
 }

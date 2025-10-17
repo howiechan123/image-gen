@@ -1,6 +1,7 @@
 package com.example.demo.Pictures;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +76,7 @@ public class PictureService {
         return stableDiffusionService.generateImage(prompt, dimensions, inference_steps, guidance_scale);
     }
 
-    public Mono<ResponseEntity<?>> pollHF(String eventId){
+    public CompletableFuture<ResponseEntity<?>> pollHF(String eventId){
         return stableDiffusionService.pollHF(eventId);
     }
 

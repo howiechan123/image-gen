@@ -1,6 +1,7 @@
 package com.example.demo.Pictures;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -82,7 +83,7 @@ public class PictureController {
 
     @PostMapping("/pollHF")
     @RateLimit(limit = 10, period = 60)
-    public Mono<ResponseEntity<?>> poll(@RequestBody eventDTO dto) {
+    public CompletableFuture<ResponseEntity<?>> poll(@RequestBody eventDTO dto) {
         String eventId = dto.event_id();
         return pictureService.pollHF(eventId);
     }
