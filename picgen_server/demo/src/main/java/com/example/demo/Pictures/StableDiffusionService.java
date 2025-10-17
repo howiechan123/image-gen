@@ -13,8 +13,6 @@ import reactor.core.publisher.Mono;
 public class StableDiffusionService {
 
     public Mono<ResponseEntity<?>> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale) {
-        System.out.println("Start HF POST call");
-
         return Mono.fromCallable(() -> {
             String postCmd = String.format(
                     "curl -s -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
@@ -37,63 +35,39 @@ public class StableDiffusionService {
             p.waitFor();
             p.destroy();
 
-            System.out.println("POST response: " + postOutput);
-
             String eventId = postOutput.replaceAll(".*\"event_id\"\\s*:\\s*\"([^\"]+)\".*", "$1").trim();
             if (eventId.isEmpty() || eventId.equals(postOutput)) {
-                return ResponseEntity.status(500).body("Failed to extract event_id from response: " + postOutput);
+                return ResponseEntity.status(500).body("{\"success\":false,\"message\":\"Failed to extract event_id\"}");
             }
 
-            return ResponseEntity.ok("{\"event_id\": \"" + eventId + "\"}");
+            return ResponseEntity.ok("{\"success\":true,\"event_id\":\"" + eventId + "\"}");
         });
     }
 
     public Mono<ResponseEntity<?>> pollHF(String eventId) {
-        System.out.println("Polling HF for event_id: " + eventId);
-
         return Mono.fromCallable(() -> {
-            String getOutput = "";
-            int maxAttempts = 600;
-            int delayMs = 10000;
+            String getCmd = "curl -s https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+            ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
 
-            for (int i = 0; i < maxAttempts; i++) {
-                String getCmd = "curl -s https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
-                ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
-                pb.redirectErrorStream(true);
-                Process p = pb.start();
+            String getOutput;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                getOutput = reader.lines().collect(Collectors.joining("\n"));
+            }
+            p.waitFor();
+            p.destroy();
 
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                    getOutput = reader.lines().collect(Collectors.joining("\n"));
-                }
-                p.waitFor();
-                p.destroy();
-
-                if (getOutput.contains("\"data\"") && getOutput.contains("base64")) {
-                    break;
-                }
-
-                Thread.sleep(delayMs);
+            if (!getOutput.contains("\"data\"")) {
+                return ResponseEntity.ok("{\"success\":false,\"message\":\"Still processing\"}");
             }
 
-            System.out.println("Final GET response: " + getOutput);
-
-            String jsonArray = getOutput.replaceAll("(?s).*\\\"data\\\"\\s*:\\s*(\\[.*?\\])\\s*}.*", "$1").trim();
-            if (jsonArray.isEmpty() || jsonArray.equals(getOutput)) {
-                return ResponseEntity.status(500)
-                        .body("Error: Could not extract image data from Hugging Face response. Response: " + getOutput);
+            if (getOutput.contains("base64")) {
+                String base64 = getOutput.replaceAll("(?s).*\"data\":\\[\"(.*?)\".*", "$1").trim();
+                return ResponseEntity.ok("{\"success\":true,\"image\":\"" + base64 + "\"}");
             }
 
-            String simplifiedJson = jsonArray
-                    .replaceAll("^\\[\\s*\\{", "{")
-                    .replaceAll("}\\s*]$", "}")
-                    .replace("\"prompt params\":", "\"prompt_params\":");
-
-            simplifiedJson = simplifiedJson
-                    .replaceAll("(?s)\\\"prompt_params\\\"\\s*:\\s*\\{[^}]*\\\"prompt\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"[^}]*}", "\"prompt\":\"$1\"");
-
-            return ResponseEntity.ok()
-                    .header("Content-Type", "application/json")
-                    .body(simplifiedJson);
+            return ResponseEntity.ok("{\"success\":false,\"message\":\"Not ready yet\"}");
         });
     }
 }
