@@ -15,7 +15,7 @@ public class StableDiffusionService {
         System.out.println("Start HF API call");
 
         return Mono.fromCallable(() -> {
-            // 1️⃣ Step 1: POST request to start prediction
+            // POST request to start prediction
             String postCmd = String.format(
                 "curl -s -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
                 "-H 'Content-Type: application/json' " +
@@ -45,7 +45,7 @@ public class StableDiffusionService {
                 return ResponseEntity.status(500).body("Failed to extract event_id from response: " + postOutput);
             }
 
-            // 2️⃣ Step 2: GET result with event_id
+            // GET result with event_id
             String getCmd = "curl -s -N https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
             ProcessBuilder pb2 = new ProcessBuilder("bash", "-c", getCmd);
             pb2.redirectErrorStream(true);
