@@ -15,15 +15,14 @@ public class StableDiffusionService {
         System.out.println("Start HF API call");
 
         return Mono.fromCallable(() -> {
-            // POST request to start prediction
             String postCmd = String.format(
-                "curl -s -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
-                "-H 'Content-Type: application/json' " +
-                "-d '{\"data\": [\"%s\", %d, %d, %d]}'",
-                prompt.replace("\"", "\\\""),
-                dimensions,
-                inference_steps,
-                guidance_scale
+                    "curl -s -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
+                            "-H 'Content-Type: application/json' " +
+                            "-d '{\"data\": [\"%s\", %d, %d, %d]}'",
+                    prompt.replace("\"", "\\\""),
+                    dimensions,
+                    inference_steps,
+                    guidance_scale
             );
 
             ProcessBuilder pb1 = new ProcessBuilder("bash", "-c", postCmd);
@@ -39,13 +38,11 @@ public class StableDiffusionService {
 
             System.out.println("POST response: " + postOutput);
 
-            // Parse event_id
             String eventId = postOutput.replaceAll(".*\"event_id\"\\s*:\\s*\"([^\"]+)\".*", "$1").trim();
             if (eventId.isEmpty() || eventId.equals(postOutput)) {
                 return ResponseEntity.status(500).body("Failed to extract event_id from response: " + postOutput);
             }
 
-            // GET result with event_id
             String getCmd = "curl -s -N https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
             ProcessBuilder pb2 = new ProcessBuilder("bash", "-c", getCmd);
             pb2.redirectErrorStream(true);
@@ -60,11 +57,23 @@ public class StableDiffusionService {
 
             System.out.println("GET response: " + getOutput);
 
-            if (getOutput.isEmpty()) {
-                return ResponseEntity.status(500).body("Error: Empty Hugging Face response");
+            String jsonArray = getOutput.replaceAll("(?s).*data:\\s*(\\[.*\\]).*", "$1").trim();
+            if (jsonArray.isEmpty() || jsonArray.equals(getOutput)) {
+                return ResponseEntity.status(500)
+                        .body("Error: Could not extract JSON payload from Hugging Face response.");
             }
 
-            return ResponseEntity.ok(getOutput);
+            String simplifiedJson = jsonArray
+                    .replaceAll("^\\[\\s*\\{", "{")
+                    .replaceAll("}\\s*]$", "}")
+                    .replace("\"prompt params\":", "\"prompt_params\":");
+
+            simplifiedJson = simplifiedJson
+                    .replaceAll("(?s)\\\"prompt_params\\\"\\s*:\\s*\\{[^}]*\\\"prompt\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"[^}]*}", "\"prompt\":\"$1\"");
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/json")
+                    .body(simplifiedJson);
         });
     }
 }
