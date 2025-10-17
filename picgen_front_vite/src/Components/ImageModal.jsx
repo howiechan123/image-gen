@@ -1,8 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
-import Loading from "./Loading.jsx";
-import ButtonWrapper from "./ButtonWrapper";
-
-function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic }) {
+function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic, disableClose }) {
     return (
         <AnimatePresence>
             {isOpen && (
@@ -12,7 +8,9 @@ function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic }) {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.1, ease: "easeInOut" }}
                     className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 p-4"
-                    onClick={onClose}
+                    onClick={() => {
+                        if (!disableClose) onClose(); // ✅ respects disableClose now
+                    }}
                 >
                     <motion.div
                         initial={{ scale: 0.85, opacity: 0 }}
@@ -20,11 +18,10 @@ function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic }) {
                         exit={{ scale: 0.85, opacity: 0 }}
                         transition={{ duration: 0.1, ease: "easeInOut" }}
                         className="bg-gray-900/90 text-white backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-5xl h-[80vh] flex flex-col p-6"
-                        onClick={(e) => e.stopPropagation()} // Prevent inner click from closing
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        
                         <div className="flex-1 flex items-center justify-center overflow-hidden">
-                            {generating ? (
+                            {(generating || disableClose) ? (
                                 <Loading />
                             ) : (
                                 <img
@@ -35,8 +32,7 @@ function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic }) {
                             )}
                         </div>
 
-                        
-                        {!generating && (
+                        {!disableClose && (
                             <div className="mt-4 flex justify-center gap-4">
                                 <ButtonWrapper clickable>
                                     <button
