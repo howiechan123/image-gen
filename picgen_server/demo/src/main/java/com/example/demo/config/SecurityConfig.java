@@ -34,7 +34,7 @@ public class SecurityConfig{
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/public/auth/login", "/public/register", "/public/auth/refresh").permitAll()
-                .requestMatchers("/api/Pictures/generate_image", "api/Pictures/pollHF").permitAll()
+                .requestMatchers("/api/Pictures/generate_image", "/api/Pictures/pollHF").permitAll()
                 .anyRequest().authenticated()
                 // .anyRequest().permitAll()
             )
