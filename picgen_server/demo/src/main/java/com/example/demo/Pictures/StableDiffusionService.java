@@ -60,6 +60,8 @@ public class StableDiffusionService {
             p.waitFor();
             p.destroy();
 
+            System.out.println("HF poll raw output: " + getOutput);
+
             if (!getOutput.contains("\"data\"")) {
                 return ResponseEntity.ok("{\"success\":false,\"message\":\"Still processing\"}");
             }
@@ -69,7 +71,6 @@ public class StableDiffusionService {
                 return ResponseEntity.ok("{\"success\":true,\"image\":\"" + base64 + "\"}");
             }
 
-            System.out.println(getOutput);
             return ResponseEntity.ok("{\"success\":false,\"message\":\"Not ready yet\"}");
         });
     }
