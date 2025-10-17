@@ -13,29 +13,29 @@ import reactor.core.publisher.Mono;
 public class StableDiffusionService {
 
     public Mono<ResponseEntity<?>> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale) {
-        System.out.println("Start HF API call");
+        System.out.println("Start HF POST call");
 
         return Mono.fromCallable(() -> {
             String postCmd = String.format(
                     "curl -s -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
-                            "-H 'Content-Type: application/json' " +
-                            "-d '{\"data\": [\"%s\", %d, %d, %d]}'",
+                    "-H 'Content-Type: application/json' " +
+                    "-d '{\"data\": [\"%s\", %d, %d, %d]}'",
                     prompt.replace("\"", "\\\""),
                     dimensions,
                     inference_steps,
                     guidance_scale
             );
 
-            ProcessBuilder pb1 = new ProcessBuilder("bash", "-c", postCmd);
-            pb1.redirectErrorStream(true);
-            Process p1 = pb1.start();
+            ProcessBuilder pb = new ProcessBuilder("bash", "-c", postCmd);
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
 
             String postOutput;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(p1.getInputStream()))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                 postOutput = reader.lines().collect(Collectors.joining("\n"));
             }
-            p1.waitFor();
-            p1.destroy();
+            p.waitFor();
+            p.destroy();
 
             System.out.println("POST response: " + postOutput);
 
@@ -44,21 +44,29 @@ public class StableDiffusionService {
                 return ResponseEntity.status(500).body("Failed to extract event_id from response: " + postOutput);
             }
 
+            return ResponseEntity.ok("{\"event_id\": \"" + eventId + "\"}");
+        });
+    }
+
+    public Mono<ResponseEntity<?>> pollHF(String eventId) {
+        System.out.println("Polling HF for event_id: " + eventId);
+
+        return Mono.fromCallable(() -> {
             String getOutput = "";
             int maxAttempts = 600;
             int delayMs = 10000;
 
             for (int i = 0; i < maxAttempts; i++) {
                 String getCmd = "curl -s https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
-                ProcessBuilder pb2 = new ProcessBuilder("bash", "-c", getCmd);
-                pb2.redirectErrorStream(true);
-                Process p2 = pb2.start();
+                ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
+                pb.redirectErrorStream(true);
+                Process p = pb.start();
 
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(p2.getInputStream()))) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     getOutput = reader.lines().collect(Collectors.joining("\n"));
                 }
-                p2.waitFor();
-                p2.destroy();
+                p.waitFor();
+                p.destroy();
 
                 if (getOutput.contains("\"data\"") && getOutput.contains("base64")) {
                     break;

@@ -75,6 +75,10 @@ public class PictureService {
         return stableDiffusionService.generateImage(prompt, dimensions, inference_steps, guidance_scale);
     }
 
+    public Mono<ResponseEntity<?>> pollHF(String eventId){
+        return stableDiffusionService.pollHF(eventId);
+    }
+
     public record pictureResponse(pictureDTO dto, String message, boolean success) {
 
     };

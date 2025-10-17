@@ -54,3 +54,13 @@ export const generateImage = async(prompt, dimensions, inference_steps, guidance
     }
 }
 
+export const pollHF = async(event_id) => {
+    try{
+        const response = await SpringAPI.post("api/Pictures/pollHF", {event_id});
+        return response;
+    }
+    catch(err){
+        throw new Error(err);
+    }
+}
+

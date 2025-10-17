@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.User.User;
@@ -81,6 +80,13 @@ public class PictureController {
         return pictureService.generateImage(dto.prompt(), dto.dimensions(), dto.inferenceSteps(), dto.guidanceScale());
     }
 
+    @PostMapping("/pollHF")
+    @RateLimit(limit = 10, period = 60)
+    public Mono<ResponseEntity<?>> poll(@RequestBody eventDTO dto) {
+        String eventId = dto.event_id();
+        return pictureService.pollHF(eventId);
+    }
+
     public record pictureRequestDTO(String fileName, String filePath) {
 
     }
@@ -92,6 +98,8 @@ public class PictureController {
     public record promptDTO(String prompt, int dimensions, @JsonProperty("inference_steps") int inferenceSteps, @JsonProperty("guidance_scale") int guidanceScale){
 
     }
+
+    public record eventDTO(String event_id){}
 
     
     

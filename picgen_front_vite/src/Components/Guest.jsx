@@ -6,7 +6,7 @@ import ButtonWrapper from "./ButtonWrapper";
 import Header from "./Header";
 import { savePicture } from "../api/PictureAPI";
 import { useToken } from "./TokenContext";
-import { generateImage } from "../api/PictureAPI";
+import { generateImage, pollHF } from "../api/PictureAPI";
 
 const Guest = ({ isGuest = true }) => {
   const [prompt, setPrompt] = useState("");
@@ -30,19 +30,31 @@ const Guest = ({ isGuest = true }) => {
     openModal();
 
     try {
-      const response = await generateImage(prompt, 512, 20, 10);
-      console.log(response, "here");
-      if (response.data.success) {
-        setImage(`data:image/png;base64,${response.data.image}`);
-        console.log(response);
-        openModal();
+      const postResp = await generateImage(prompt, 512, 20, 10);
+      const eventId = postResp.data.event_id;
+      if (!eventId) throw new Error("No event_id returned from server");
+
+      let finished = false;
+      let pollResp = null;
+
+      while (!finished) {
+        console.log("poll");
+        pollResp = await pollHF(eventId);
+        if (pollResp.data?.success && pollResp.data?.image) {
+          finished = true;
+          setImage(`data:image/png;base64,${pollResp.data.image}`);
+        } else {
+          await new Promise((res) => setTimeout(res, 10000)); // 10s
+        }
       }
+
     } catch (error) {
       window.alert(error);
     }
 
     setGenerating(false);
   };
+
 
   const stripBase64Prefix = (base64) => {
     if (base64.startsWith("data:image")) {
