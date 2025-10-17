@@ -14,7 +14,7 @@ const Guest = ({ isGuest = true }) => {
   const [image, setImage] = useState(null);
   const [generating, setGenerating] = useState(false);
 
-  const { setLoading } = useToken();
+  const { loading, setLoading } = useToken();
 
   const updatePrompt = (e) => setPrompt(e.target.value);
 
