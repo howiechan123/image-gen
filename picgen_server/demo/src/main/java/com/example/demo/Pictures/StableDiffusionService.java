@@ -58,16 +58,30 @@ public class StableDiffusionService {
     public ResponseEntity<?> pollHF(String eventId) {
         try {
             System.out.println("Poll call: eventId=" + eventId);
-            String getCmd = "curl -s -H 'Content-Type: application/json' " +
-                "-H 'User-Agent: PostmanRuntime/7.32.3' " +
-                "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+            String getCmd = "curl -s --no-buffer -H 'Content-Type: application/json' " +
+                    "-H 'User-Agent: PostmanRuntime/7.32.3' " +
+                    "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
             pb.redirectErrorStream(true);
             Process p = pb.start();
 
-            String output;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                output = reader.lines().collect(Collectors.joining("\n"));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("SSE line: " + line);
+
+                    if (line.startsWith("event: complete")) {
+                        // Next line should contain the data
+                        String dataLine = reader.readLine();
+                        if (dataLine != null && dataLine.startsWith("data:")) {
+                            String jsonData = dataLine.replaceFirst("data: ", "").trim();
+                            // Extract base64 from HF SSE JSON
+                            String base64 = jsonData.replaceAll("(?s).*\"image\"\\s*:\\s*\"(.*?)\".*", "$1");
+                            return ResponseEntity.ok(Map.of("success", true, "image", base64));
+                        }
+                    }
+                }
             }
 
             if (!p.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)) {
@@ -77,18 +91,6 @@ public class StableDiffusionService {
             }
             p.destroy();
 
-            System.out.println("Poll input: " + getCmd);
-            System.out.println("Poll output: " + output);
-
-            if (!output.contains("\"data\"")) {
-                return ResponseEntity.ok(Map.of("success", false, "message", "Still processing"));
-            }
-
-            if (output.contains("base64")) {
-                String base64 = output.replaceAll("(?s).*\"data\":\\[\"(.*?)\".*", "$1").trim();
-                return ResponseEntity.ok(Map.of("success", true, "image", base64));
-            }
-
             return ResponseEntity.ok(Map.of("success", false, "message", "Still processing"));
 
         } catch (Exception e) {
@@ -96,4 +98,7 @@ public class StableDiffusionService {
             return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
 }
+
+
