@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 public class StableDiffusionService {
 
     public Mono<ResponseEntity<?>> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale) {
+        System.out.println("Start HF call");
         return Mono.fromCallable(() -> {
             String postCmd = String.format(
                     "curl -s -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
@@ -39,12 +40,13 @@ public class StableDiffusionService {
             if (eventId.isEmpty() || eventId.equals(postOutput)) {
                 return ResponseEntity.status(500).body("{\"success\":false,\"message\":\"Failed to extract event_id\"}");
             }
-
+            System.out.println(eventId);
             return ResponseEntity.ok("{\"success\":true,\"event_id\":\"" + eventId + "\"}");
         });
     }
 
     public Mono<ResponseEntity<?>> pollHF(String eventId) {
+        System.out.println("POll call");
         return Mono.fromCallable(() -> {
             String getCmd = "curl -s https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
@@ -67,6 +69,7 @@ public class StableDiffusionService {
                 return ResponseEntity.ok("{\"success\":true,\"image\":\"" + base64 + "\"}");
             }
 
+            System.out.println(getOutput);
             return ResponseEntity.ok("{\"success\":false,\"message\":\"Not ready yet\"}");
         });
     }
