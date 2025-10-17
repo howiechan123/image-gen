@@ -9,7 +9,7 @@ function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic, disa
                     transition={{ duration: 0.1, ease: "easeInOut" }}
                     className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50 p-4"
                     onClick={() => {
-                        if (!disableClose) onClose(); // ✅ respects disableClose now
+                        if (!disableClose) onClose();
                     }}
                 >
                     <motion.div
