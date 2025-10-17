@@ -3,6 +3,7 @@ package com.example.demo.Pictures;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class StableDiffusionService {
                 output = reader.lines().collect(Collectors.joining("\n"));
             }
 
-            if (!p.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)) {
+            if (!p.waitFor(10, TimeUnit.SECONDS)) {
                 p.destroy();
                 System.out.println("HF call timeout: " + postCmd);
                 return ResponseEntity.ok(Map.of("success", false, "message", "HF server not responding, try polling later"));
@@ -66,31 +67,27 @@ public class StableDiffusionService {
             pb.redirectErrorStream(true);
             Process p = pb.start();
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println("SSE line: " + line);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-                    if (line.startsWith("event: complete")) {
-                        // Next line should contain the data
-                        String dataLine = reader.readLine();
-                        if (dataLine != null && dataLine.startsWith("data:")) {
-                            String jsonData = dataLine.replaceFirst("data: ", "").trim();
-                            // Extract base64 from HF SSE JSON
-                            String base64 = jsonData.replaceAll("(?s).*\"image\"\\s*:\\s*\"(.*?)\".*", "$1");
-                            return ResponseEntity.ok(Map.of("success", true, "image", base64));
-                        }
+            long startTime = System.currentTimeMillis();
+            String line;
+            while ((System.currentTimeMillis() - startTime) < 10_000 && (line = reader.readLine()) != null) {
+                System.out.println("SSE line: " + line);
+
+                if (line.startsWith("event: complete")) {
+                    String dataLine = reader.readLine();
+                    if (dataLine != null && dataLine.startsWith("data:")) {
+                        String jsonData = dataLine.replaceFirst("data: ", "").trim();
+                        String base64 = jsonData.replaceAll("(?s).*\"image\"\\s*:\\s*\"(.*?)\".*", "$1");
+                        p.destroy();
+                        return ResponseEntity.ok(Map.of("success", true, "image", base64));
                     }
                 }
             }
 
-            if (!p.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)) {
-                p.destroy();
-                System.out.println("Poll timeout for eventId=" + eventId);
-                return ResponseEntity.ok(Map.of("success", false, "message", "Still processing"));
-            }
+            // Timeout reached, close connection
             p.destroy();
-
+            System.out.println("Poll timeout for eventId=" + eventId);
             return ResponseEntity.ok(Map.of("success", false, "message", "Still processing"));
 
         } catch (Exception e) {
@@ -100,5 +97,3 @@ public class StableDiffusionService {
     }
 
 }
-
-
