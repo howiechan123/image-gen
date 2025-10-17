@@ -1,12 +1,13 @@
 package com.example.demo.Pictures;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import reactor.core.publisher.Mono;
 
 @Service
 public class StableDiffusionService {
@@ -43,24 +44,35 @@ public class StableDiffusionService {
                 return ResponseEntity.status(500).body("Failed to extract event_id from response: " + postOutput);
             }
 
-            String getCmd = "curl -s -N https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
-            ProcessBuilder pb2 = new ProcessBuilder("bash", "-c", getCmd);
-            pb2.redirectErrorStream(true);
-            Process p2 = pb2.start();
+            String getOutput = "";
+            int maxAttempts = 600;
+            int delayMs = 10000;
 
-            String getOutput;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(p2.getInputStream()))) {
-                getOutput = reader.lines().collect(Collectors.joining("\n"));
+            for (int i = 0; i < maxAttempts; i++) {
+                String getCmd = "curl -s https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+                ProcessBuilder pb2 = new ProcessBuilder("bash", "-c", getCmd);
+                pb2.redirectErrorStream(true);
+                Process p2 = pb2.start();
+
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(p2.getInputStream()))) {
+                    getOutput = reader.lines().collect(Collectors.joining("\n"));
+                }
+                p2.waitFor();
+                p2.destroy();
+
+                if (getOutput.contains("\"data\"") && getOutput.contains("base64")) {
+                    break;
+                }
+
+                Thread.sleep(delayMs);
             }
-            p2.waitFor();
-            p2.destroy();
 
-            System.out.println("GET response: " + getOutput);
+            System.out.println("Final GET response: " + getOutput);
 
-            String jsonArray = getOutput.replaceAll("(?s).*data:\\s*(\\[.*\\]).*", "$1").trim();
+            String jsonArray = getOutput.replaceAll("(?s).*\\\"data\\\"\\s*:\\s*(\\[.*?\\])\\s*}.*", "$1").trim();
             if (jsonArray.isEmpty() || jsonArray.equals(getOutput)) {
                 return ResponseEntity.status(500)
-                        .body("Error: Could not extract JSON payload from Hugging Face response.");
+                        .body("Error: Could not extract image data from Hugging Face response. Response: " + getOutput);
             }
 
             String simplifiedJson = jsonArray
