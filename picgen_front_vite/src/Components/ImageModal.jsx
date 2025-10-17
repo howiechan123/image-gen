@@ -1,3 +1,7 @@
+import { motion, AnimatePresence } from "framer-motion";
+import Loading from "./Loading.jsx";
+import ButtonWrapper from "./ButtonWrapper";
+
 function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic, disableClose }) {
     return (
         <AnimatePresence>
@@ -63,3 +67,4 @@ function ImageModal({ isOpen, onClose, image, isGuest, generating, savePic, disa
 }
 
 export default ImageModal;
+
