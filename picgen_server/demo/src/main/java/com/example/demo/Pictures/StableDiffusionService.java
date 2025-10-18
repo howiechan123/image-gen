@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -45,8 +44,7 @@ public class StableDiffusionService {
 
             String eventId = output.replaceAll(".*\"event_id\"\\s*:\\s*\"([^\"]+)\".*", "$1").trim();
             if (eventId.isEmpty() || eventId.equals(output)) {
-                return ResponseEntity.status(500)
-                        .body(Map.of("success", false, "message", "Failed to extract event_id"));
+                return ResponseEntity.status(500).body(Map.of("success", false, "message", "Failed to extract event_id"));
             }
 
             return ResponseEntity.ok(Map.of("success", true, "event_id", eventId));
@@ -73,7 +71,6 @@ public class StableDiffusionService {
             String line;
             while ((System.currentTimeMillis() - startTime) < 10_000 && (line = reader.readLine()) != null) {
                 System.out.println("SSE line: " + line);
-
                 if (line.startsWith("event: complete")) {
                     String dataLine = reader.readLine();
                     if (dataLine != null && dataLine.startsWith("data:")) {
@@ -85,15 +82,12 @@ public class StableDiffusionService {
                 }
             }
 
-            // Timeout reached, close connection
             p.destroy();
             System.out.println("Poll timeout for eventId=" + eventId);
             return ResponseEntity.ok(Map.of("success", false, "message", "Still processing"));
-
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
         }
     }
-
 }
