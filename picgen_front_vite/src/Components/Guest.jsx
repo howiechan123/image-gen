@@ -24,59 +24,46 @@ const Guest = ({ isGuest = true }) => {
     setGenerating(false);
   };
 
-  const handleGenerate = async () => {
-    if (!prompt) return window.alert("Please enter a prompt");
-    setGenerating(true);
-    openModal();
+const handleGenerate = async () => {
+  if (!prompt) return window.alert("Please enter a prompt");
+  setGenerating(true);
+  openModal();
 
-    try {
-      // Start HF generation
-      const postResp = await generateImage(prompt, 512, 20, 10);
-      const eventId = postResp.data?.event_id;
-      if (!eventId) throw new Error("No event_id returned from server");
+  try {
+    // Start HF generation
+    const postResp = await generateImage(prompt, 512, 20, 10);
+    const eventId = postResp.data?.event_id;
+    if (!eventId) throw new Error("No event_id returned from server");
 
-      const pollInterval = 10000; // 10 seconds
-      const maxAttempts = 60;
-      let attempts = 0;
+    const delayMs = 6 * 60 * 1000; // 6 minutes
 
-      const poll = async () => {
-        try {
-          console.log("Polling event:", eventId, "Attempt:", attempts);
-          const pollResp = await pollHF(eventId);
+    setTimeout(async () => {
+      try {
+        console.log("Delayed poll after 6 minutes, event:", eventId);
+        const pollResp = await pollHF(eventId);
 
-          if (pollResp.data?.success && pollResp.data?.image) {
-            // Image ready
-            setImage(`data:image/png;base64,${pollResp.data.image}`);
-            setGenerating(false);
-            openModal();
-          } else if (attempts < maxAttempts) {
-            // Still processing, schedule next poll
-            attempts++;
-            setTimeout(poll, pollInterval);
-          } else {
-            setGenerating(false);
-            alert("Image generation timed out. Please try again.");
-          }
-        } catch (error) {
-          console.error("Polling error:", error);
-          if (attempts < maxAttempts) {
-            attempts++;
-            setTimeout(poll, pollInterval);
-          } else {
-            setGenerating(false);
-            alert("Error during polling. Please try again.");
-          }
+        if (pollResp.data?.success && pollResp.data?.image) {
+          setImage(`data:image/png;base64,${pollResp.data.image}`);
+        } else {
+          console.warn("Image not ready yet or error:", pollResp.data);
+          alert("Image still not ready after 6 minutes.");
         }
-      };
+      } catch (error) {
+        console.error("Delayed polling error:", error);
+        alert("Error during delayed polling. Please try again.");
+      } finally {
+        setGenerating(false);
+        openModal();
+      }
+    }, delayMs);
 
-      // Start polling
-      poll();
-    } catch (error) {
-      console.error("Generate error:", error);
-      alert("Failed to start generation. Please try again.");
-      setGenerating(false);
-    }
-  };
+  } catch (error) {
+    console.error("Generate error:", error);
+    alert("Failed to start generation. Please try again.");
+    setGenerating(false);
+  }
+};
+
 
 
 
