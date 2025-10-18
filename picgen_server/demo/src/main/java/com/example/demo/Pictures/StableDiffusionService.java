@@ -14,8 +14,9 @@ public class StableDiffusionService {
     public ResponseEntity<?> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale) {
         try {
             System.out.println("Start HF call: prompt=" + prompt);
+            // -i flag added to log headers
             String postCmd = String.format(
-                "curl -s -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
+                "curl -s -i -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
                 "-H 'Content-Type: application/json' " +
                 "-d '{\"data\": [\"%s\", %d, %d, %d]}'",
                 prompt.replace("\"", "\\\""),
@@ -40,14 +41,29 @@ public class StableDiffusionService {
             }
             p.destroy();
 
-            System.out.println("HF call output: " + output);
+            // Log everything from POST response: headers + body
+            System.out.println("========== FULL HF RAW RESPONSE ==========");
+            System.out.println(output);
+            System.out.println("==========================================");
 
             String eventId = output.replaceAll(".*\"event_id\"\\s*:\\s*\"([^\"]+)\".*", "$1").trim();
             if (eventId.isEmpty() || eventId.equals(output)) {
+                System.out.println("Failed to extract event_id from output");
                 return ResponseEntity.status(500).body(Map.of("success", false, "message", "Failed to extract event_id"));
             }
 
+            System.out.println("Extracted event_id: " + eventId);
+
+            // Log cookies if present (look for Set-Cookie)
+            String[] lines = output.split("\n");
+            for (String line : lines) {
+                if (line.toLowerCase().startsWith("set-cookie:")) {
+                    System.out.println("Cookie from HF response: " + line);
+                }
+            }
+
             return ResponseEntity.ok(Map.of("success", true, "event_id", eventId));
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
@@ -58,8 +74,8 @@ public class StableDiffusionService {
         try {
             System.out.println("Poll call: eventId=" + eventId);
             String getCmd = "curl -s --no-buffer -H 'Content-Type: application/json' " +
-                    "-H 'User-Agent: PostmanRuntime/7.32.3' " +
-                    "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+                            "-H 'User-Agent: PostmanRuntime/7.32.3' " +
+                            "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
 
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
             pb.redirectErrorStream(true);
@@ -69,25 +85,58 @@ public class StableDiffusionService {
 
             long startTime = System.currentTimeMillis();
             String line;
+
+            StringBuilder sseData = new StringBuilder();
+
             while ((System.currentTimeMillis() - startTime) < 10_000 && (line = reader.readLine()) != null) {
                 System.out.println("SSE line: " + line);
+                sseData.append(line).append("\n");
+
+                // Log data events separately
+                if (line.startsWith("data:")) {
+                    String dataLine = line.replaceFirst("data:", "").trim();
+                    System.out.println("SSE data event: " + dataLine);
+                }
+
+                // Detect completion event
                 if (line.startsWith("event: complete")) {
                     String dataLine = reader.readLine();
                     if (dataLine != null && dataLine.startsWith("data:")) {
-                        String jsonData = dataLine.replaceFirst("data: ", "").trim();
+                        String jsonData = dataLine.replaceFirst("data:", "").trim();
                         String base64 = jsonData.replaceAll("(?s).*\"image\"\\s*:\\s*\"(.*?)\".*", "$1");
                         p.destroy();
-                        return ResponseEntity.ok(Map.of("success", true, "image", base64));
+
+                        System.out.println("Poll returning success. EventId=" + eventId);
+                        System.out.println("Full SSE data collected:\n" + sseData);
+
+                        return ResponseEntity.ok(Map.of(
+                            "success", true,
+                            "eventId", eventId,
+                            "sseData", sseData.toString(),
+                            "image", base64
+                        ));
                     }
                 }
             }
 
             p.destroy();
             System.out.println("Poll timeout for eventId=" + eventId);
-            return ResponseEntity.ok(Map.of("success", false, "message", "Still processing"));
+            System.out.println("Returning still processing. Full SSE data collected:\n" + sseData);
+
+            return ResponseEntity.ok(Map.of(
+                "success", false,
+                "eventId", eventId,
+                "message", "Still processing",
+                "sseData", sseData.toString()
+            ));
+
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "eventId", eventId,
+                "message", e.getMessage()
+            ));
         }
     }
 }
