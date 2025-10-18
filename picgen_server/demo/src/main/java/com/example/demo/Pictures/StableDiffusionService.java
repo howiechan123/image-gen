@@ -18,13 +18,13 @@ public class StableDiffusionService {
         try {
             System.out.println("Start HF call: prompt=" + prompt);
             String postCmd = String.format(
-                "curl -s -i -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
-                "-H 'Content-Type: application/json' " +
-                "-d '{\"data\": [\"%s\", %d, %d, %d]}'",
-                prompt.replace("\"", "\\\""),
-                dimensions,
-                inference_steps,
-                guidance_scale
+                    "curl -s -i -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
+                    "-H 'Content-Type: application/json' " +
+                    "-d '{\"data\": [\"%s\", %d, %d, %d]}'",
+                    prompt.replace("\"", "\\\""),
+                    dimensions,
+                    inference_steps,
+                    guidance_scale
             );
 
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", postCmd);
@@ -48,20 +48,25 @@ public class StableDiffusionService {
             System.out.println(output);
             System.out.println("==========================================");
 
-            // Extract event_id
-            String eventId = output.replaceAll(".*\"event_id\"\\s*:\\s*\"([^\"]+)\".*", "$1").trim();
-            if (eventId.isEmpty() || eventId.equals(output)) {
-                System.out.println("Failed to extract event_id from output");
+            // Correctly extract event_id from JSON body only
+            String eventId = null;
+            for (String line : output.split("\n")) {
+                if (line.contains("\"event_id\"")) {
+                    eventId = line.replaceAll(".*\"event_id\"\\s*:\\s*\"([^\"]+)\".*", "$1").trim();
+                    break;
+                }
+            }
+
+            if (eventId == null || eventId.isEmpty()) {
+                System.out.println("Failed to extract event_id from JSON body");
                 return ResponseEntity.status(500).body(Map.of("success", false, "message", "Failed to extract event_id"));
             }
             System.out.println("Extracted event_id: " + eventId);
 
             // Capture session cookie if present
-            String[] lines = output.split("\n");
-            for (String line : lines) {
+            for (String line : output.split("\n")) {
                 if (line.toLowerCase().startsWith("set-cookie:")) {
                     System.out.println("Cookie from HF response: " + line);
-                    // Save first session cookie for reuse
                     if (sessionCookie == null) {
                         sessionCookie = line.split(";", 2)[0]; // e.g., session_id=xxxx
                     }
@@ -83,9 +88,9 @@ public class StableDiffusionService {
             String cookieHeader = sessionCookie != null ? "-H 'Cookie: " + sessionCookie + "'" : "";
 
             String getCmd = "curl -s --no-buffer -H 'Content-Type: application/json' " +
-                            "-H 'User-Agent: PostmanRuntime/7.32.3' " +
-                            cookieHeader + " " +
-                            "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
+                    "-H 'User-Agent: PostmanRuntime/7.32.3' " +
+                    cookieHeader + " " +
+                    "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
 
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
             pb.redirectErrorStream(true);
@@ -98,12 +103,12 @@ public class StableDiffusionService {
             StringBuilder sseData = new StringBuilder();
 
             while ((System.currentTimeMillis() - startTime) < 10_000 && (line = reader.readLine()) != null) {
-                System.out.println("SSE line: " + line); // your original sysout
+                System.out.println("SSE line: " + line);
                 sseData.append(line).append("\n");
 
                 if (line.startsWith("data:")) {
                     String dataLine = line.replaceFirst("data:", "").trim();
-                    System.out.println("SSE data event: " + dataLine); // log actual SSE output
+                    System.out.println("SSE data event: " + dataLine);
                 }
 
                 if (line.startsWith("event: complete")) {
