@@ -34,9 +34,10 @@ const Guest = ({ isGuest = true }) => {
       const eventId = response.data?.event_id;
       const queueTime = response.data.number_of_processes;
       if (!eventId) throw new Error("No event_id returned from server");
-      console.log("queueTime:", queueTime, "delayMs:", delayMs);
+      
 
       const delayMs = queueTime * 60 * 1000 * 6;
+      console.log("queueTime:", queueTime, "delayMs:", delayMs);
 
       setTimeout(async () => {
         try {
