@@ -18,4 +18,4 @@ services:
       - key: IMGBB_KEY
         fromSecret: true
       - key: REDIS_URL
-        value: redis://default:1FU3Pj2sYNvkpFD6DMvKw27elCrZbl3e@red-d3qr0g2li9vc73cjc0fg:6379
+        value: redis://red-d3r5vugdl3ps73cejnl0:6379
