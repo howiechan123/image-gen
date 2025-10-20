@@ -20,7 +20,7 @@ public class StableDiffusionService {
     }
 
     public ResponseEntity<?> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale) {
-        System.out.println("REDIS_URL env: " + System.getenv("REDIS_URL"));
+
         try {
             System.out.println("Start HF call: prompt=" + prompt);
             String postCmd = String.format(
