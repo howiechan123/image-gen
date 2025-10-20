@@ -2,18 +2,20 @@ services:
   - type: web
     name: picgen-backend
     env: docker
-    region: virginia      
-    branch: main          
+    region: virginia
+    branch: main
     rootDirectory: picgen_server/demo
     plan: free
     envVars:
       - key: DB_URL
-        fromSecret: true # store as a Render secret
+        fromSecret: true
       - key: DB_USERNAME
         fromSecret: true
       - key: DB_PASSWORD
-        fromSecret: true   
+        fromSecret: true
       - key: JWT_SECRET_KEY
-        fromSecret: true   
+        fromSecret: true
       - key: IMGBB_KEY
-        fromSecret: true   
+        fromSecret: true
+      - key: REDIS_URL
+        value: redis://default:1FU3Pj2sYNvkpFD6DMvKw27elCrZbl3e@red-d3qr0g2li9vc73cjc0fg:6379
