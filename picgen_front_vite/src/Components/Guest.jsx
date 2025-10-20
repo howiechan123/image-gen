@@ -24,50 +24,45 @@ const Guest = ({ isGuest = true }) => {
     setGenerating(false);
   };
 
-const handleGenerate = async () => {
-  if (!prompt) return window.alert("Please enter a prompt");
-  setGenerating(true);
-  openModal();
+  const handleGenerate = async () => {
+    if (!prompt) return window.alert("Please enter a prompt");
+    setGenerating(true);
+    openModal();
 
-  try {
-    // Start HF generation
-    const postResp = await generateImage(prompt, 512, 20, 10);
-    const eventId = postResp.data?.event_id;
-    if (!eventId) throw new Error("No event_id returned from server");
+    try {
+      const response = await generateImage(prompt, 512, 20, 10);
+      const eventId = response.data?.event_id;
+      const queueTime = response.number_of_processes;
+      if (!eventId) throw new Error("No event_id returned from server");
 
-    const delayMs = 6 * 60 * 1000; // 6 minutes
+      const delayMs = number_of_processes * 60 * 1000;
 
-    setTimeout(async () => {
-      try {
-        console.log("Delayed poll after 6 minutes, event:", eventId);
-        const pollResp = await pollHF(eventId);
+      setTimeout(async () => {
+        try {
+          console.log("Delayed poll after 6 minutes, event:", eventId);
+          const pollResp = await pollHF(eventId);
 
-        if (pollResp.data?.success && pollResp.data?.image) {
-          setImage(`data:image/png;base64,${pollResp.data.image}`);
-        } else {
-          console.warn("Image not ready yet or error:", pollResp.data);
-          alert("Image still not ready after 6 minutes.");
+          if (pollResp.data?.success && pollResp.data?.image) {
+            setImage(`data:image/png;base64,${pollResp.data.image}`);
+          } else {
+            console.warn("Image not ready yet or error:", pollResp.data);
+            alert("Please retry prompt");
+          }
+        } catch (error) {
+          console.error("Delayed polling error:", error);
+          alert("Error during generation. Please try again.");
+        } finally {
+          setGenerating(false);
+          openModal();
         }
-      } catch (error) {
-        console.error("Delayed polling error:", error);
-        alert("Error during delayed polling. Please try again.");
-      } finally {
-        setGenerating(false);
-        openModal();
-      }
-    }, delayMs);
+      }, delayMs);
 
-  } catch (error) {
-    console.error("Generate error:", error);
-    alert("Failed to start generation. Please try again.");
-    setGenerating(false);
-  }
-};
-
-
-
-
-
+    } catch (error) {
+      console.error("Generate error:", error);
+      alert("Failed to start generation. Please try again.");
+      setGenerating(false);
+    }
+  };
 
   const stripBase64Prefix = (base64) => {
     if (base64.startsWith("data:image")) {
@@ -86,6 +81,14 @@ const handleGenerate = async () => {
     } finally {
       closeModal();
       setLoading(false);
+    }
+  };
+
+  const handlePromptChange = (e) => {
+    const input = e.target.value;
+    const words = input.trim().split(/\s+/);
+    if (words.length <= 25) {
+      updatePrompt(e);
     }
   };
 
@@ -110,13 +113,23 @@ const handleGenerate = async () => {
             What image would you like to create?
           </header>
 
-          <textarea
-            id="prompt"
-            onChange={updatePrompt}
-            value={prompt}
-            className="w-full h-32 px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
-            placeholder="Enter a prompt..."
-          ></textarea>
+
+
+        <textarea
+          id="prompt"
+          value={prompt}
+          onChange={handlePromptChange}
+          onInput={(e) => {
+            const words = e.target.value.trim().split(/\s+/);
+            if (words.length > 25) {
+              // Prevents typing extra characters visually
+              e.target.value = words.slice(0, 25).join(" ");
+            }
+          }}
+          className="w-full h-32 px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
+          placeholder="Enter a prompt (max 25 words)..."
+        />
+
 
           {/* <select>
             Inference Steps

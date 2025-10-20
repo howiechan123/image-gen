@@ -3,16 +3,21 @@ package com.example.demo.Pictures;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import com.example.demo.HFQueue.QueueService;
 
 @Service
 public class StableDiffusionService {
 
-    // Store session cookie from generateImage to reuse in pollHF
-    private String sessionCookie = null;
+    private final QueueService queueService;
+
+    public StableDiffusionService(QueueService queueService) {
+        this.queueService = queueService;
+    }
 
     public ResponseEntity<?> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale) {
         try {
@@ -36,19 +41,13 @@ public class StableDiffusionService {
                 output = reader.lines().collect(Collectors.joining("\n"));
             }
 
-            if (!p.waitFor(10, TimeUnit.SECONDS)) {
-                p.destroy();
-                System.out.println("HF call timeout: " + postCmd);
-                return ResponseEntity.ok(Map.of("success", false, "message", "HF server not responding, try polling later"));
-            }
+            p.waitFor();
             p.destroy();
 
-            // Log full response
             System.out.println("========== FULL HF RAW RESPONSE ==========");
             System.out.println(output);
             System.out.println("==========================================");
 
-            // Correctly extract event_id from JSON body only
             String eventId = null;
             for (String line : output.split("\n")) {
                 if (line.contains("\"event_id\"")) {
@@ -59,51 +58,49 @@ public class StableDiffusionService {
 
             if (eventId == null || eventId.isEmpty()) {
                 System.out.println("Failed to extract event_id from JSON body");
-                return ResponseEntity.status(500).body(Map.of("success", false, "message", "Failed to extract event_id"));
-            }
-            System.out.println("Extracted event_id: " + eventId);
-
-            // Capture session cookie if present
-            for (String line : output.split("\n")) {
-                if (line.toLowerCase().startsWith("set-cookie:")) {
-                    System.out.println("Cookie from HF response: " + line);
-                    if (sessionCookie == null) {
-                        sessionCookie = line.split(";", 2)[0]; // e.g., session_id=xxxx
-                    }
-                }
+                return ResponseEntity.status(500).body(Map.of(
+                        "success", false,
+                        "message", "Failed to extract event_id"
+                ));
             }
 
-            return ResponseEntity.ok(Map.of("success", true, "event_id", eventId));
+            int queueLength = queueService.incrementQueue();
+            System.out.println("Queue incremented. Current queue count: " + queueLength);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "event_id", eventId,
+                    "number_of_processes", queueLength
+            ));
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.status(500).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
         }
     }
 
+
     public ResponseEntity<?> pollHF(String eventId) {
+        Process p = null;
         try {
             System.out.println("Poll call: eventId=" + eventId);
 
-            String cookieHeader = sessionCookie != null ? "-H 'Cookie: " + sessionCookie + "'" : "";
-
             String getCmd = "curl -s --no-buffer -H 'Content-Type: application/json' " +
                     "-H 'User-Agent: PostmanRuntime/7.32.3' " +
-                    cookieHeader + " " +
                     "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
 
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
             pb.redirectErrorStream(true);
-            Process p = pb.start();
+            p = pb.start();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-            long startTime = System.currentTimeMillis();
             String line;
             StringBuilder sseData = new StringBuilder();
 
-            while ((System.currentTimeMillis() - startTime) < 10_000 && (line = reader.readLine()) != null) {
-                System.out.println("SSE line: " + line);
+            while ((line = reader.readLine()) != null) {
                 sseData.append(line).append("\n");
 
                 if (line.startsWith("data:")) {
@@ -116,7 +113,6 @@ public class StableDiffusionService {
                     if (dataLine != null && dataLine.startsWith("data:")) {
                         String jsonData = dataLine.replaceFirst("data:", "").trim();
                         String base64 = jsonData.replaceAll("(?s).*\"image\"\\s*:\\s*\"(.*?)\".*", "$1");
-                        p.destroy();
 
                         System.out.println("Poll returning success. EventId=" + eventId);
                         System.out.println("Full SSE data collected:\n" + sseData);
@@ -131,14 +127,13 @@ public class StableDiffusionService {
                 }
             }
 
-            p.destroy();
-            System.out.println("Poll timeout for eventId=" + eventId);
+            System.out.println("Poll ended before receiving complete event for eventId=" + eventId);
             System.out.println("Returning still processing. Full SSE data collected:\n" + sseData);
 
             return ResponseEntity.ok(Map.of(
                     "success", false,
                     "eventId", eventId,
-                    "message", "Still processing",
+                    "message", "Stream closed before completion",
                     "sseData", sseData.toString()
             ));
 
@@ -149,6 +144,9 @@ public class StableDiffusionService {
                     "eventId", eventId,
                     "message", e.getMessage()
             ));
+        } finally {
+            if (p != null) p.destroy();
+            queueService.decrementQueue();
         }
     }
 }
