@@ -17,11 +17,8 @@ public class RedisStartupReset {
     public void clearRedisOnStartup() {
         try {
             redisTemplate.delete("queue_count");
-
-            // full reset
-            // redisTemplate.getConnectionFactory().getConnection().flushAll();
-
-            System.out.println("Redis reset on startup: queue_count cleared");
+            redisTemplate.opsForValue().set("queue_count", 0);
+            System.out.println("Redis reset on startup: queue_count set to 0");
         } catch (Exception e) {
             System.err.println("Failed to clear Redis on startup: " + e.getMessage());
         }
