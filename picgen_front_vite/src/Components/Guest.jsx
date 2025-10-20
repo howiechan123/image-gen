@@ -36,7 +36,7 @@ const Guest = ({ isGuest = true }) => {
       if (!eventId) throw new Error("No event_id returned from server");
       console.log("queueTime:", queueTime, "delayMs:", delayMs);
 
-      const delayMs = queueTime * 60 * 1000;
+      const delayMs = queueTime * 60 * 1000 * 6;
 
       setTimeout(async () => {
         try {
