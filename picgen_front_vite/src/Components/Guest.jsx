@@ -32,7 +32,7 @@ const Guest = ({ isGuest = true }) => {
     try {
       const response = await generateImage(prompt, 512, 20, 10);
       const eventId = response.data?.event_id;
-      const queueTime = response.number_of_processes;
+      const queueTime = response.data.number_of_processes;
       if (!eventId) throw new Error("No event_id returned from server");
       console.log("queueTime:", queueTime, "delayMs:", delayMs);
 
