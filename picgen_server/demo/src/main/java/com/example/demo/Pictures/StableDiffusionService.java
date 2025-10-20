@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.HFQueue.QueueService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class StableDiffusionService {
@@ -20,17 +21,19 @@ public class StableDiffusionService {
     }
 
     public ResponseEntity<?> generateImage(String prompt, int dimensions, int inference_steps, int guidance_scale) {
-
         try {
             System.out.println("Start HF call: prompt=" + prompt);
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> payload = Map.of(
+                "data", new Object[] { prompt, dimensions, inference_steps, guidance_scale }
+            );
+            String json = mapper.writeValueAsString(payload);
+
             String postCmd = String.format(
-                    "curl -s -i -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
-                    "-H 'Content-Type: application/json' " +
-                    "-d '{\"data\": [\"%s\", %d, %d, %d]}'",
-                    prompt.replace("\"", "\\\""),
-                    dimensions,
-                    inference_steps,
-                    guidance_scale
+                "curl -s -i -X POST https://sdserver123-sdserver123.hf.space/gradio_api/call/predict " +
+                "-H 'Content-Type: application/json' " +
+                "-d '%s'", json
             );
 
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", postCmd);
@@ -60,8 +63,8 @@ public class StableDiffusionService {
             if (eventId == null || eventId.isEmpty()) {
                 System.out.println("Failed to extract event_id from JSON body");
                 return ResponseEntity.status(500).body(Map.of(
-                        "success", false,
-                        "message", "Failed to extract event_id"
+                    "success", false,
+                    "message", "Failed to extract event_id"
                 ));
             }
 
@@ -69,19 +72,20 @@ public class StableDiffusionService {
             System.out.println("Queue incremented. Current queue count: " + queueLength);
 
             return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "event_id", eventId,
-                    "number_of_processes", queueLength
+                "success", true,
+                "event_id", eventId,
+                "number_of_processes", queueLength
             ));
 
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of(
-                    "success", false,
-                    "message", e.getMessage()
+                "success", false,
+                "message", e.getMessage()
             ));
         }
     }
+
 
 
     public ResponseEntity<?> pollHF(String eventId) {
