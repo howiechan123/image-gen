@@ -147,7 +147,8 @@ public class StableDiffusionService {
             ));
         } finally {
             if (p != null) p.destroy();
-            queueService.decrementQueue();
+            int q = queueService.decrementQueue();
+            System.out.println("Decrement queue: count: " + q);
         }
     }
 }
