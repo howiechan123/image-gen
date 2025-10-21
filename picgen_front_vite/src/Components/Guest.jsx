@@ -36,12 +36,12 @@ const Guest = ({ isGuest = true }) => {
       if (!eventId) throw new Error("No event_id returned from server");
       
 
-      const delayMs = queueTime * 60 * 1000 * 6;
+      const delayMs = queueTime * 60 * 1000 * 5;
       console.log("queueTime:", queueTime, "delayMs:", delayMs);
 
       setTimeout(async () => {
         try {
-          console.log("Delayed poll after 6 minutes, event:", eventId);
+          console.log("Delayed poll after 5 minutes, event:", eventId);
           const pollResp = await pollHF(eventId);
 
           if (pollResp.data?.success && pollResp.data?.image) {
