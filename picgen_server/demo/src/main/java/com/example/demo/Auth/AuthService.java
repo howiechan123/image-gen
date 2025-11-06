@@ -7,14 +7,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CookieValue;
 
 import com.example.demo.JWT.JWTUtil;
 import com.example.demo.User.User;
 import com.example.demo.User.UserRepository;
-import com.example.demo.User.UserService.userResponse;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
@@ -62,7 +61,7 @@ public class AuthService {
         
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false) // set false if testing locally without https
+                .secure(true) // set false if testing locally without https
                 .path("/public/auth")
                 .maxAge(60 * 60 * 5) // 5 hours
                 .sameSite("Lax")

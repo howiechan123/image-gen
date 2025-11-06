@@ -4,6 +4,7 @@ package com.example.demo.User;
 import java.util.List;
 
 import com.example.demo.Pictures.Picture;
+import com.example.demo.Posts.Post;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -27,12 +28,17 @@ public class User {
     private String name;
     private String email;
     private int tokenVersion = 0;
+
     @JsonIgnore
     private String password;
 
     @OneToMany(mappedBy="user", cascade=CascadeType.ALL, orphanRemoval=true)
     @JsonManagedReference
     private List<Picture> pictures;
+
+    @OneToMany(mappedBy="user", cascade=CascadeType.ALL, orphanRemoval=true)
+    @JsonManagedReference
+    private List<Post> posts;
 
 
     public User(){
@@ -115,6 +121,16 @@ public class User {
 
     public void setTokenVersion(int tokenVersion) {
         this.tokenVersion = tokenVersion;
+    }
+
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 
     

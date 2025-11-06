@@ -18,11 +18,15 @@ public class RedisConfig {
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         String redisUrl = System.getenv("REDIS_URL");
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         if (redisUrl == null || redisUrl.isEmpty()) {
-            throw new IllegalStateException("REDIS_URL environment variable is missing");
+            // throw new IllegalStateException("REDIS_URL environment variable is missing");
+            config.setHostName("localhost");
+            config.setPort(6379);
+            return new LettuceConnectionFactory(config);
         }
 
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+        
         URI uri = URI.create(redisUrl);
 
         config.setHostName(uri.getHost());

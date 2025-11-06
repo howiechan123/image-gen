@@ -1,5 +1,6 @@
 package com.example.demo.Pictures;
 
+import com.example.demo.Posts.Post;
 import com.example.demo.User.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -9,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
@@ -25,7 +27,7 @@ public class Picture {
     private String deleteUrl;
 
     @ManyToOne
-    @JoinColumn(name="userId", nullable=false)
+    @JoinColumn(name="user_Id", nullable=false)
     @JsonBackReference
     private User user;
 
@@ -103,9 +105,5 @@ public class Picture {
     public void setDeleteUrl(String deleteUrl) {
         this.deleteUrl = deleteUrl;
     }
-
-    
-
-    
 
 }

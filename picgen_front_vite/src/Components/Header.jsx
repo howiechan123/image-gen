@@ -28,6 +28,7 @@ const Header = ({ isGuest }) => {
   const openSavedPics = () => navigate('/savedPics');
   const openAccount = () => navigate("/account");
   const goHome = () => navigate("/home");
+  const openFeed = () => navigate("/feed");
 
   
   const handleNavClick = (callback) => {
@@ -103,6 +104,9 @@ const Header = ({ isGuest }) => {
           <>
             <div className="border-b border-gray-700 md:border-none last:border-b-0">
               <button onClick={() => handleNavClick(goHome)} className={linkButton}>Home</button>
+            </div>
+            <div className="border-b border-gray-700 md:border-none last:border-b-0">
+              <button onClick={() => handleNavClick(openFeed)} className={linkButton}>Feed</button>
             </div>
             
             <div className="border-b border-gray-700 md:border-none last:border-b-0">

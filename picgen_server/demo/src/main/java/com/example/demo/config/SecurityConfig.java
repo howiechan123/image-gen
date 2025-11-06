@@ -38,8 +38,7 @@ public class SecurityConfig{
                 .anyRequest().authenticated()
                 // .anyRequest().permitAll()
             )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            ;
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -52,7 +51,7 @@ public class SecurityConfig{
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("https://howiechan-ai.vercel.app")); // frontend, huggingface server
+        config.setAllowedOrigins(List.of("http://localhost:5173/","https://howiechan-ai.vercel.app")); // frontend, huggingface server
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(List.of("*"));
