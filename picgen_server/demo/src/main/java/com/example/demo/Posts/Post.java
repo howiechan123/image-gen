@@ -1,7 +1,9 @@
 package com.example.demo.Posts;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
+import com.example.demo.Comments.Comment;
 import com.example.demo.Pictures.Picture;
 import com.example.demo.User.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -25,8 +27,10 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "post_sequence")
     @SequenceGenerator(name = "post_sequence", sequenceName = "post_seq", allocationSize = 1)
     private Long postId;
-    private int likeCount;
+    private Long likeCount;
     private LocalDateTime timePosted;
+    private String caption;
+    private ArrayList<Comment> comments;
 
     @ManyToOne
     @JoinColumn(name="user_Id", nullable=false)
@@ -38,11 +42,13 @@ public class Post {
     private Picture picture;
     
 
-    public Post(Picture picture, User user, int likeCount, LocalDateTime timePosted){
+    public Post(Picture picture, User user, int likeCount, LocalDateTime timePosted, String caption, ArrayList<Comment> comments){
         this.picture = picture;
         this.user = user;
         this.likeCount = likeCount;
         this.timePosted = timePosted;
+        this.caption = caption;
+        this.comments = comments;
     }
 
     public Long getPostId() {
