@@ -42,7 +42,7 @@ public class Post {
     private Picture picture;
     
 
-    public Post(Picture picture, User user, int likeCount, LocalDateTime timePosted, String caption, ArrayList<Comment> comments){
+    public Post(Picture picture, User user, Long likeCount, LocalDateTime timePosted, String caption, ArrayList<Comment> comments){
         this.picture = picture;
         this.user = user;
         this.likeCount = likeCount;
@@ -71,10 +71,26 @@ public class Post {
     public void setUser(User user) {
         this.user = user;
     }
-    public int getLikeCount() {
+    public Long getLikeCount() {
         return likeCount;
     }
-    public void setLikeCount(int likeCount) {
+    public String getCaption() {
+        return caption;
+    }
+
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
+    public ArrayList<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(ArrayList<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public void setLikeCount(Long likeCount) {
         this.likeCount = likeCount;
     }
     public LocalDateTime getTimePosted() {
