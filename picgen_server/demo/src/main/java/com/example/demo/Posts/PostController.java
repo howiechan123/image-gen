@@ -1,8 +1,5 @@
 package com.example.demo.Posts;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,13 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.Comments.Comment;
-import com.example.demo.Pictures.Picture;
 import com.example.demo.Posts.PostService.postDTO;
-import com.example.demo.User.User;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping(path="api/posts")
 public class PostController {
     
     private final PostService postService;
@@ -52,6 +46,11 @@ public class PostController {
     @GetMapping("/getFeed")
     public ResponseEntity<?> getFeed(){
         return postService.getFeed();
+    }
+
+    @PostMapping("/updateLikes/{id}")
+    public ResponseEntity<?> updateLikes(@PathVariable("id") Long id, @RequestBody int likeOrDislike){
+        return postService.updateLikes(id, likeOrDislike);
     }
 
 }

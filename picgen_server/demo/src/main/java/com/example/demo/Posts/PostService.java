@@ -38,12 +38,11 @@ public class PostService {
 
     public ResponseEntity<?> updatePostById(Long id, postDTO dto){
         Post post = postRepository.findById(id).orElseThrow(() -> new IllegalStateException("post does not exist"));
-        post.setPicture(dto.picture());
-        post.setUser(dto.user());
-        post.setLikeCount(dto.likeCount());
-        post.setTimePosted(dto.timePosted());
-        post.setCaption(dto.caption());
-        post.setComments(dto.comments());
+        if(dto.picture() != null) post.setPicture(dto.picture());
+        if(dto.user() != null) post.setUser(dto.user());
+        if(dto.timePosted() != null) post.setTimePosted(dto.timePosted());
+        if(dto.caption() != null) post.setCaption(dto.caption());
+        if(dto.comments() != null) post.setComments(dto.comments());
         return ResponseEntity.ok(new postResponse(null, true, "post updated"));
     }
 
@@ -57,6 +56,17 @@ public class PostService {
         ArrayList<Post> posts = postRepository.findAllPosts();
         postListDTO dto = new postListDTO(posts);
         return ResponseEntity.ok(new postListResponse(dto, true, "get all posts"));
+    }
+
+    public ResponseEntity<?> updateLikes(Long id, int likeOrDislike){
+        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalStateException("post does not exist"));
+        if(likeOrDislike == 1){
+            post.setLikeCount(post.getLikeCount() + 1);
+        }
+        if(likeOrDislike == -1){
+            post.setLikeCount(post.getLikeCount() - 1);
+        }
+        return ResponseEntity.ok(new postResponse(null, true, "likes updated: " + likeOrDislike));
     }
 
 
