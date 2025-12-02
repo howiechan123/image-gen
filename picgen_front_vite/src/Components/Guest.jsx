@@ -7,11 +7,12 @@ import Header from "./Header";
 import { savePicture } from "../api/PictureAPI";
 import { useToken } from "./TokenContext";
 import { generateImage, pollHF } from "../api/PictureAPI";
+import funny from "/funny.png";
 
 const Guest = ({ isGuest = true }) => {
   const [prompt, setPrompt] = useState("");
   const [imageModalOpen, setImageModalOpen] = useState(false);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl91wAAAABJRU5ErkJggg==");
   const [generating, setGenerating] = useState(false);
 
   const { loading, setLoading } = useToken();
@@ -56,6 +57,7 @@ const Guest = ({ isGuest = true }) => {
         } finally {
           setGenerating(false);
           openModal();
+          await savePic();
         }
       }, delayMs);
 

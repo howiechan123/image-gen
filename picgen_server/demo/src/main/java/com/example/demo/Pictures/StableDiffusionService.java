@@ -77,16 +77,14 @@ public class StableDiffusionService {
                 "number_of_processes", queueLength
             ));
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of(
-                "success", false,
-                "message", e.getMessage()
-            ));
-        }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(500).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+                ));
+            }
     }
-
-
 
     public ResponseEntity<?> pollHF(String eventId) {
         Process p = null;
@@ -98,6 +96,7 @@ public class StableDiffusionService {
                     "https://sdserver123-sdserver123.hf.space/gradio_api/call/predict/" + eventId;
 
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", getCmd);
+
             pb.redirectErrorStream(true);
             p = pb.start();
 

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.Posts.PostService.postDTO;
+import com.example.demo.config.RateLimit;
 
 @RestController
 @RequestMapping(path="api/posts")
@@ -24,31 +25,37 @@ public class PostController {
     }
 
     @PostMapping("/create")
+    @RateLimit(limit = 50, period = 60)
     public ResponseEntity<?> createPost(@RequestBody postDTO dto){
         return postService.createPost(dto.picture(), dto.user(), dto.caption());
     }
 
     @DeleteMapping("/delete/{id}")
+    @RateLimit(limit = 50, period = 60)
     public ResponseEntity<?> deletePost(@PathVariable("id") Long id){
         return postService.deletePostById(id);
     }
     
-    @PostMapping("/update/{id}")
-    public ResponseEntity<?> updatePost(@PathVariable("id") Long id, @RequestBody postDTO dto){
-        return postService.updatePostById(id, dto);
+    @PostMapping("/updateCaption/{id}")
+    @RateLimit(limit = 50, period = 60)
+    public ResponseEntity<?> updatePost(@PathVariable("id") Long id, @RequestBody String caption){
+        return postService.updateCaption(id, caption);
     }
 
     @GetMapping("/userPosts/{id}")
+    @RateLimit(limit = 50, period = 60)
     public ResponseEntity<?> getPostsByUserId(@PathVariable("id") Long userId){
         return postService.getPostsByUserId(userId);
     }
 
     @GetMapping("/getFeed")
+    @RateLimit(limit = 50, period = 60)
     public ResponseEntity<?> getFeed(){
         return postService.getFeed();
     }
 
     @PostMapping("/updateLikes/{id}")
+    @RateLimit(limit = 50, period = 60)
     public ResponseEntity<?> updateLikes(@PathVariable("id") Long id, @RequestBody int likeOrDislike){
         return postService.updateLikes(id, likeOrDislike);
     }

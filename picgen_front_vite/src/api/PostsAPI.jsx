@@ -52,6 +52,16 @@ export const updatePostLikes = async(postId, likeOrDislike) => {
     }
 }
 
+export const updatePostCaption = async(postId, caption) => {
+    try{
+        const response = await SpringAPI.post(`api/posts/delete/${postId}`, caption);
+        return response;
+    }
+    catch(err){
+        throw new Error(err);
+    }
+}
+
 
 
 
