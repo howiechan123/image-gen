@@ -6,6 +6,7 @@ import SavedPics from './Components/SavedPics.jsx';
 import Guest from './Components/Guest.jsx';
 import Account from './Components/Account.jsx';
 import Feed from './Components/Feed.jsx';
+import Posts from './Components/Posts.jsx';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import { TokenProvider, useToken } from './Components/TokenContext.jsx';
 import ProtectedRoute from './Components/ProtectedRoute.jsx';
@@ -31,6 +32,7 @@ const AppContent = () => {
       <Route path="/savedPics" element={<ProtectedRoute><SavedPics /></ProtectedRoute>} />
       <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
       <Route path = "/feed" element={<ProtectedRoute><Feed/></ProtectedRoute>}/>
+      <Route path = "/posts" element={<ProtectedRoute><Posts/></ProtectedRoute>}/>
       <Route path="*" element={<h1>404 - Page Not Found</h1>} />
     </Routes>
   );

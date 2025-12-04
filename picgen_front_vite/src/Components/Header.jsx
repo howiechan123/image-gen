@@ -29,6 +29,7 @@ const Header = ({ isGuest }) => {
   const openAccount = () => navigate("/account");
   const goHome = () => navigate("/home");
   const openFeed = () => navigate("/feed");
+  const openPosts = () => navigate("/posts");
 
   
   const handleNavClick = (callback) => {
@@ -50,6 +51,9 @@ const Header = ({ isGuest }) => {
     "/home": "Home",
     "/account": "Account",
     "/savedPics": "Saved Pictures",
+    "/feed": "Feed",
+    "/posts": "Your Posts",
+    
   };
   const currentPage = pageTitles[location.pathname] || "Guest";
 
@@ -107,6 +111,9 @@ const Header = ({ isGuest }) => {
             </div>
             <div className="border-b border-gray-700 md:border-none last:border-b-0">
               <button onClick={() => handleNavClick(openFeed)} className={linkButton}>Feed</button>
+            </div>
+            <div className="border-b border-gray-700 md:border-none last:border-b-0">
+              <button onClick={() => handleNavClick(openPosts)} className={linkButton}>Your Posts</button>
             </div>
             
             <div className="border-b border-gray-700 md:border-none last:border-b-0">

@@ -21,9 +21,9 @@ export const deletePost = async(postId) => {
     }
 }
 
-export const getUserPost = async(userId) => {
+export const getUserPosts = async() => {
     try{
-        const response = await SpringAPI.get(`api/posts/userPosts/${userId}`);
+        const response = await SpringAPI.get("api/posts/userPosts");
         return response;
     }
     catch(err){

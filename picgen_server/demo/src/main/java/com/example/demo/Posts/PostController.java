@@ -2,6 +2,8 @@ package com.example.demo.Posts;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,9 +44,11 @@ public class PostController {
         return postService.updateCaption(id, caption);
     }
 
-    @GetMapping("/userPosts/{id}")
+    @GetMapping("/userPosts")
     @RateLimit(limit = 50, period = 60)
-    public ResponseEntity<?> getPostsByUserId(@PathVariable("id") Long userId){
+    public ResponseEntity<?> getPostsByUserId(){
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = Long.valueOf(userDetails.getUsername());
         return postService.getPostsByUserId(userId);
     }
 
